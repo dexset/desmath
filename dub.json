@@ -1,0 +1,14 @@
+{
+    "name": "desmath",
+    "description": "D Extended Set Math",
+    "authors": [ "Oleg Butko (deviator)" ],
+    "license": "MIT",
+    "targetType": "sourceLibrary",
+    "importPaths": [ "src" ],
+    "sourcePaths": [ "src" ],
+    "dependencies":
+    {
+        "dests" : "~>0.2.0",
+        "desstdx" : "~>0.1.0"
+    }
+}

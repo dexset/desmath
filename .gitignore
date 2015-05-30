@@ -1,0 +1,16 @@
+*.lib
+*.so
+*.a
+*.o
+
+.*.sw*
+.dub
+*.log
+*.def
+*.lst
+*.sh
+bin
+doc
+dub.selections.json
+
+test/test
