@@ -38,8 +38,8 @@ unittest
 
     import std.math;
     auto va = ft * pa;
-    assert( abs( va - a1 ) <= step * 2 * pa );
-    assert( abs( va - a2 ) <= step * pa );
+    assert( eq_approx( va, a1, step * pa * 2 ) );
+    assert( eq_approx( va, a2, step * pa ) );
 
     auto rpart2( in float A, double time ) { return pa; }
 

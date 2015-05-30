@@ -68,8 +68,8 @@ private @property
 
     unittest
     {
-        assert( identityMatrixDataString!3 == "[[1,0,0],[0,1,0],[0,0,1]]" );
-        assert( zerosMatrixDataString!(3,3) == "[[0,0,0],[0,0,0],[0,0,0]]" );
+        assertEq( identityMatrixDataString!3, "[[1,0,0],[0,1,0],[0,0,1]]" );
+        assertEq( zerosMatrixDataString!(3,3), "[[0,0,0],[0,0,0],[0,0,0]]" );
     }
 
     string castArrayString(string type, size_t H, size_t W)()
@@ -960,32 +960,32 @@ unittest
 
 unittest
 {
-    assert( eq( mat3.init, [[1,0,0],[0,1,0],[0,0,1]] ) );
-    assert( eq( mat2.init, [[1,0],[0,1]] ) );
-    assert( eq( mat2x3.init, [[0,0,0],[0,0,0]] ) );
+    assertEq( mat3.init, [[1,0,0],[0,1,0],[0,0,1]] );
+    assertEq( mat2.init, [[1,0],[0,1]] );
+    assertEq( mat2x3.init, [[0,0,0],[0,0,0]] );
 }
 
 unittest
 {
     auto a = Matrix!(3,2,double)( 36, 0, 3, 3, 0, 0 );
     auto b = Matrix!(3,2,double)( [ 36, 0, 3, 3, 0, 0 ] );
-    assert( eq( a.asArray, b.asArray ) );
-    assert( eq( a.asArray, [ 36, 0, 3, 3, 0, 0 ] ) );
+    assertEq( a.asArray, b.asArray );
+    assertEq( a.asArray, [ 36, 0, 3, 3, 0, 0 ] );
 }
 
 unittest
 {
     auto a = mat3( 1,2,3,4,5,6,7,8,9 );
-    assert( a.height == 3 );
-    assert( a.width == 3 );
-    assert( eq( a, [[1,2,3],[4,5,6],[7,8,9]] ) );
+    assertEq( a.height, 3 );
+    assertEq( a.width, 3 );
+    assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
     static assert( !__traits(compiles,a.resize(1,1)) );
     a.fill(1);
-    assert( eq( a, [[1,1,1], [1,1,1], [1,1,1]] ) );
+    assertEq( a, [[1,1,1], [1,1,1], [1,1,1]] );
     a[0][0] *= 3;
-    assert( eq( a, [[3,1,1], [1,1,1], [1,1,1]] ) );
+    assertEq( a, [[3,1,1], [1,1,1], [1,1,1]] );
     a[1][0] += 3;
-    assert( eq( a, [[3,1,1], [4,1,1], [1,1,1]] ) );
+    assertEq( a, [[3,1,1], [4,1,1], [1,1,1]] );
 }
 
 ///
@@ -1003,95 +1003,95 @@ unittest
     Test tt;
 
     foreach( i, ref v; tt.uf ) v = i+1;
-    assert( eq( tt.um, [[1,2,3],[4,5,6],[7,8,9]] ) );
+    assertEq( tt.um, [[1,2,3],[4,5,6],[7,8,9]] );
 }
 
 ///
 unittest
 {
     auto a = matDx3( 1,2,3,4,5,6,7,8,9 );
-    assert( mustExcept( {matDx3(1,2,3,4);} ) );
-    assert( a.height == 3 );
-    assert( a.width == 3 );
-    assert( eq( a, [[1,2,3],[4,5,6],[7,8,9]] ) );
-    assert( mustExcept({ a.resize(2,2); }) );
+    assertExcept({matDx3(1,2,3,4);});
+    assertEq( a.height, 3 );
+    assertEq( a.width, 3 );
+    assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
+    assertExcept({ a.resize(2,2); });
     a.resize(2,3);
-    assert( eq( a, [[1,2,3],[4,5,6]] ) );
-    assert( a.height == 2 );
+    assertEq( a, [[1,2,3],[4,5,6]] );
+    assertEq( a.height, 2 );
     a.fill(1);
-    assert( eq( a, [[1,1,1],[1,1,1]] ) );
+    assertEq( a, [[1,1,1],[1,1,1]] );
     a.resize(0,3);
-    assert( a.width == 3 );
+    assertEq( a.width, 3 );
     a.resize(2,3);
     a.fill(1);
 
     auto b = a;
-    assert( eq( b, [[1,1,1],[1,1,1]] ) );
+    assertEq( b, [[1,1,1],[1,1,1]] );
 }
 
 unittest
 {
     auto a = mat3xD( 1,2,3,4,5,6,7,8,9 );
-    assert( mustExcept( {mat3xD(1,2,3,4);} ) );
-    assert( a.height == 3 );
-    assert( a.width == 3 );
-    assert( eq( a, [[1,2,3],[4,5,6],[7,8,9]] ) );
-    assert( mustExcept({ a.resize(2,2); }) );
+    assertExcept({mat3xD(1,2,3,4);});
+    assertEq( a.height, 3 );
+    assertEq( a.width, 3 );
+    assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
+    assertExcept({ a.resize(2,2); });
     a.resize(3,2);
-    assert( eq( a, [[1,2],[4,5],[7,8]] ) );
-    assert( a.width == 2 );
+    assertEq( a, [[1,2],[4,5],[7,8]] );
+    assertEq( a.width, 2 );
     a.fill(1);
-    assert( eq( a, [[1,1],[1,1],[1,1]] ) );
+    assertEq( a, [[1,1],[1,1],[1,1]] );
 
     auto b = a;
-    assert( eq( b, [[1,1],[1,1],[1,1]] ) );
+    assertEq( b, [[1,1],[1,1],[1,1]] );
 }
 
 unittest
 {
     auto a = matD( 3,3, 1,2,3,4,5,6,7,8,9 );
-    assert( mustExcept( {matD(1,2,3,4,5);} ) );
-    assert( a.height == 3 );
-    assert( a.width == 3 );
-    assert( eq( a, [[1,2,3],[4,5,6],[7,8,9]] ) );
+    assertExcept({ matD(1,2,3,4,5); });
+    assertEq( a.height, 3 );
+    assertEq( a.width, 3 );
+    assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
     a.resize(2,2);
-    assert( eq( a, [[1,2],[4,5]] ) );
+    assertEq( a, [[1,2],[4,5]] );
     auto b = matD(2,2);
     b.fill(1);
-    assert( eq( b, [[1,1],[1,1]] ) );
+    assertEq( b, [[1,1],[1,1]] );
     b = a;
-    assert( eq( a, b ) );
+    assertEq( a, b );
     auto c = matD( Matrix!(2,4,float)(1,2,3,4,5,6,7,8) );
-    assert( eq( c, [[1,2,3,4],[5,6,7,8]] ) );
-    assert( c.height == 2 );
-    assert( c.width == 4 );
-    assert( b.height == 2 );
-    assert( b.width == 2 );
+    assertEq( c, [[1,2,3,4],[5,6,7,8]] );
+    assertEq( c.height, 2 );
+    assertEq( c.width, 4 );
+    assertEq( b.height, 2 );
+    assertEq( b.width, 2 );
     b = c;
-    assert( b.height == 2 );
-    assert( b.width == 4 );
-    assert( eq( b, c ) );
+    assertEq( b.height, 2 );
+    assertEq( b.width, 4 );
+    assertEq( b, c );
     b[0][0] = 666;
-    assert( !eq( b, c ) );
+    assertNotEq( b, c );
 }
 
 unittest
 {
     auto a = mat3xD( 1,2,3,4,5,6,7,8,9 );
     matD b;
-    assert( b.height == 0 );
-    assert( b.width == 0 );
+    assertEq( b.height, 0 );
+    assertEq( b.width, 0 );
     b = a;
-    assert( b.height == 3 );
-    assert( b.width == 3 );
-    assert( eq( a, b ) );
+    assertEq( b.height, 3 );
+    assertEq( b.width, 3 );
+    assertEq( a, b );
     a[0][0] = 22;
-    assert( !eq( a, b ) );
+    assertNotEq( a, b );
     a = b;
-    assert( eq( a, b ) );
+    assertEq( a, b );
     b.height = 4;
-    assert(  mustExcept({ a = b; }) );
-    assert( !mustExcept({ b = a; }) );
+    assertExcept({ a = b; });
+    { b = a; } // no except
 }
 
 ///
@@ -1107,14 +1107,14 @@ unittest
     auto ehc = c.expandHeight( 8,8,8 );
     auto ehd = d.expandHeight( 8,8,8 );
 
-    assert( eq( eha, [[1,2,3],[4,5,6],[7,8,9],[8,8,8]] ));
-    assert( eha.height == 4 );
-    assert( ehb.height == 4 );
-    assert( ehc.height == 4 );
-    assert( ehd.height == 4 );
-    assert( eq( eha, ehb ) );
-    assert( eq( eha, ehc ) );
-    assert( eq( eha, ehd ) );
+    assertEq( eha, [[1,2,3],[4,5,6],[7,8,9],[8,8,8]] );
+    assertEq( eha.height, 4 );
+    assertEq( ehb.height, 4 );
+    assertEq( ehc.height, 4 );
+    assertEq( ehd.height, 4 );
+    assertEq( eha, ehb );
+    assertEq( eha, ehc );
+    assertEq( eha, ehd );
 
     static assert( is(typeof(eha) == Matrix!(0,3,float)) );
     static assert( is(typeof(ehd) == Matrix!(0,3,float)) );
@@ -1127,14 +1127,14 @@ unittest
     auto ewc = c.expandWidth( 8,8,8 );
     auto ewd = d.expandWidth( 8,8,8 );
 
-    assert( eq( ewa, [[1,2,3,8],[4,5,6,8],[7,8,9,8]] ));
-    assert( ewa.width == 4 );
-    assert( ewb.width == 4 );
-    assert( ewc.width == 4 );
-    assert( ewd.width == 4 );
-    assert( eq( ewa, ewb ) );
-    assert( eq( ewa, ewc ) );
-    assert( eq( ewa, ewd ) );
+    assertEq( ewa, [[1,2,3,8],[4,5,6,8],[7,8,9,8]] );
+    assertEq( ewa.width, 4 );
+    assertEq( ewb.width, 4 );
+    assertEq( ewc.width, 4 );
+    assertEq( ewd.width, 4 );
+    assertEq( ewa, ewb );
+    assertEq( ewa, ewc );
+    assertEq( ewa, ewd );
 
     static assert( is(typeof(ewa) == Matrix!(3,0,float)) );
     static assert( is(typeof(ewc) == Matrix!(3,0,float)) );
@@ -1143,23 +1143,23 @@ unittest
     static assert( is(typeof(ewd) == Matrix!(0,0,float)) );
 
     auto aa = a.expandHeight(a);
-    assert( eq( aa, [[1,2,3],[4,5,6],[7,8,9],[1,2,3],[4,5,6],[7,8,9]] ));
-    assert( aa.height == 6 );
+    assertEq( aa, [[1,2,3],[4,5,6],[7,8,9],[1,2,3],[4,5,6],[7,8,9]] );
+    assertEq( aa.height, 6 );
     static assert( is(typeof(aa) == Matrix!(0,3,float)) );
 }
 
 unittest
 {
     auto a = mat3( 1,2,3,4,5,6,7,8,9 );
-    assert( a.asArray == [1.0f,2,3,4,5,6,7,8,9] );
+    assertEq( a.asArray, [1.0f,2,3,4,5,6,7,8,9] );
 }
 
 ///
 unittest
 {
     auto a = matD(4,4,0).fillDiag(1);
-    assert( eq( a, mat4() ) );
-    assert( eq( a.inv, a ) );
+    assertEq( a, mat4() );
+    assertEq( a.inv, a );
 }
 
 ///
@@ -1178,21 +1178,22 @@ unittest
     a.resize( 10, 4 );
     b.resize( 10, 10 );
     auto c = a.T * b * a;
-    assert( c.height == 4 && c.width == 4 );
+    assertEq( c.height, 4 );
+    assertEq( c.width, 4 );
 }
 
 ///
 unittest
 {
     auto a = mat3.diag(1);
-    assert( eq(a,[[1,0,0],[0,1,0],[0,0,1]]) );
+    assertEq( a, [[1,0,0],[0,1,0],[0,0,1]] );
     auto b = mat3xD.diag(1,2);
-    assert( eq(b,[[1,0,0],[0,2,0],[0,0,1]]) );
+    assertEq( b, [[1,0,0],[0,2,0],[0,0,1]] );
     auto c = mat3xD.diag(1,2,3);
-    assert( eq(c,[[1,0,0],[0,2,0],[0,0,3]]) );
+    assertEq( c, [[1,0,0],[0,2,0],[0,0,3]] );
     static assert( !__traits(compiles,matD.diag(1)) );
     auto d = matD(3,3).fill(0).fillDiag(1);
-    assert( eq(d,[[1,0,0],[0,1,0],[0,0,1]]) );
+    assertEq( d, [[1,0,0],[0,1,0],[0,0,1]] );
 }
 
 ///
@@ -1200,25 +1201,25 @@ unittest
 {
     auto a = mat3( 1,2,3,4,5,6,7,8,9 );
     auto sha = a.sliceHeight(1);
-    assert( eq(sha,[[4,5,6],[7,8,9]]) );
+    assertEq( sha, [[4,5,6],[7,8,9]] );
     auto swsha = sha.sliceWidth(0,1);
-    assert( eq(swsha,[[4],[7]]) );
+    assertEq( swsha, [[4],[7]] );
 }
 
 ///
 unittest
 {
     auto a = mat3.diag(1);
-    assert( eq( -a,[[-1,0,0],[0,-1,0],[0,0,-1]]) );
+    assertEq( -a, [[-1,0,0],[0,-1,0],[0,0,-1]] );
 }
 
 unittest
 {
     auto a = mat3.diag(1);
     auto b = a*3-a;
-    assert( eq( b,a*2 ) );
+    assertEq( b, a*2 );
     b /= 2;
-    assert( eq( b,a ) );
+    assertEq( b,a );
 }
 
 ///
@@ -1229,11 +1230,11 @@ unittest
 
     auto b = a * ainv;
     static assert( is( typeof(b) == Matrix!(3,0,real) ) );
-    assert( eq( b, mat3.diag(1) ) );
+    assertEq( b, mat3.diag(1) );
 
     static assert( !__traits(compiles,a *= ainv ) );
     a *= rmat3(ainv);
-    assert( eq( a, mat3.diag(1) ) );
+    assertEq( a, mat3.diag(1) );
 }
 
 ///
@@ -1242,7 +1243,7 @@ unittest
     alias Matrix!(4,5,float) mat4x5;
 
     auto a = mat2x4.init * mat4xD.init;
-    assert( mustExcept({ mat4xD.init * mat2x4.init; }) );
+    assertExcept({ mat4xD.init * mat2x4.init; });
     auto b = mat2x4.init * mat4x5.init;
 
     static assert( is( typeof(a) == Matrix!(2,0,float) ) );
@@ -1262,7 +1263,7 @@ unittest
     static assert( is( typeof(aT) == Matrix!(3,2,float) ) );
     static assert( is( typeof(bT) == Matrix!(0,4,float) ) );
 
-    assert( bT.height == b.width );
+    assertEq( bT.height, b.width );
 }
 
 unittest
@@ -1270,12 +1271,12 @@ unittest
     auto a = mat3.diag(1);
 
     a.setRow(2,4,5,6);
-    assert( eq( a, [[1,0,0],[0,1,0],[4,5,6]] ) );
+    assertEq( a, [[1,0,0],[0,1,0],[4,5,6]] );
     a.setCol(1,8,4,2);
-    assert( eq( a, [[1,8,0],[0,4,0],[4,2,6]] ) );
+    assertEq( a, [[1,8,0],[0,4,0],[4,2,6]] );
 
-    assert( eq( a.row(0), [[1,8,0]] ) );
-    assert( eq( a.col(0), [[1],[0],[4]] ) );
+    assertEq( a.row(0), [[1,8,0]] );
+    assertEq( a.col(0), [[1],[0],[4]] );
 }
 
 ///
@@ -1283,11 +1284,11 @@ unittest
 {
     auto b = mat3.diag(2) * vec3(2,3,4);
     assert( is( typeof(b) == vec3 ) );
-    assert( eq( b, [4,6,8] ) );
+    assertEq( b, [4,6,8] );
 
     auto c = vec3(1,1,1) * mat3.diag(1,2,3);
     assert( is( typeof(c) == vec3 ) );
-    assert( eq( c, [1,2,3] ) );
+    assertEq( c, [1,2,3] );
 }
 
 ///
@@ -1299,11 +1300,11 @@ unittest
     auto a = mtr * vec3(1,1,1);
 
     assert( is( typeof(a) == Vector!(0,float) ) );
-    assert( a.length == 2 );
-    assert( eq( a, [ 6, 14 ] ) );
+    assertEq( a.length, 2 );
+    assertEq( a, [ 6, 14 ] );
 
     auto b = vec3(1,1,1) * mtr.T;
-    assert( eq( a, b ) );
+    assertEq( a, b );
 }
 
 ///
@@ -1317,14 +1318,14 @@ unittest
                   13,14,15,16 );
         auto sm = mtr.subWithout( [0,3,3,3], [1,2] );
         assert( is( typeof(sm) == matD ) );
-        assert( sm.width == 2 );
-        assert( sm.height == 2 );
-        assert( eq( sm, [ [5,8], [9,12] ] ) );
-        assert( mustExcept({ mtr.sub( [0,4], [1,2] ); }) );
+        assertEq( sm.width, 2 );
+        assertEq( sm.height, 2 );
+        assertEq( sm, [ [5,8], [9,12] ] );
+        assertExcept({ mtr.sub( [0,4], [1,2] ); });
         auto sm2 = mtr.subWithout( [], [1,2] );
-        assert( sm2.width == 2 );
-        assert( sm2.height == 4 );
-        assert( eq( sm2, [ [1,4],[5,8],[9,12],[13,16] ] ) );
+        assertEq( sm2.width, 2 );
+        assertEq( sm2.height, 4 );
+        assertEq( sm2, [ [1,4],[5,8],[9,12],[13,16] ] );
     }
 
     check( matD(4,4) );
@@ -1333,7 +1334,7 @@ unittest
 
 unittest
 {
-    assert( eq( matD(4,4,0).fillDiag(1,2,3,4).det, 24 ) );
+    assertEq( matD(4,4,0).fillDiag(1,2,3,4).det, 24 );
 }
 
 unittest
@@ -1343,7 +1344,7 @@ unittest
                                 9,1,3,0,
                                 9,2,4,2 );
     auto xx = mtr * mtr.inv;
-    assert( eq( xx, matD(4,4,0).fillDiag(1) ) );
+    assertEq( xx, matD(4,4,0).fillDiag(1) );
 }
 
 unittest
@@ -1354,7 +1355,7 @@ unittest
                                0,0,0,1 );
     auto vv = vec4(4,2,1,1);
     auto rv = mtr.speedTransformInv * (mtr*vv);
-    assert( eq( rv, vv ) );
+    assertEq( rv, vv );
 }
 
 unittest
@@ -1373,7 +1374,7 @@ unittest
     auto vr = mtr.T * vv * mtr;
 
     auto xx = mtr * mtr.inv;
-    assert( eq( xx, mat4.diag(1) ) );
+    assertEq( xx, mat4.diag(1) );
 }
 
 unittest
@@ -1384,17 +1385,17 @@ unittest
                       9,2,4,2 );
 
     auto xx = mtr * mtr.rowReduceInv;
-    assert( eq( xx, mat4() ) );
+    assertEq( xx, mat4() );
 }
 
 ///
 unittest
 {
     auto mtr = mat4().setRect(0,0,mat3.diag(1)).setCol(3,1,2,3,4);
-    assert( eq( mtr, [[1,0,0,1],
-                      [0,1,0,2],
-                      [0,0,1,3],
-                      [0,0,0,4]] ) );
+    assertEq( mtr, [[1,0,0,1],
+                    [0,1,0,2],
+                    [0,0,1,3],
+                    [0,0,0,4]] );
 }
 
 unittest

@@ -4,11 +4,9 @@
     "authors": [ "Oleg Butko (deviator)" ],
     "license": "MIT",
     "targetType": "sourceLibrary",
-    "importPaths": [ "src" ],
-    "sourcePaths": [ "src" ],
     "dependencies":
     {
-        "dests" : "~>0.2.0",
+        "dests" : "~>0.2.1",
         "desstdx" : "~>0.1.0"
     }
 }

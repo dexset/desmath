@@ -155,7 +155,7 @@ unittest
     auto r1 = fRay( vec3(1,2,3), vec3(2,3,4) );
     auto r2 = fRay( vec3(4,5,6), vec3(5,2,3) );
     auto rs = fRay( vec3(5,7,9), vec3(7,5,7) );
-    assert( r1 + r2 == rs );
+    assertEq( r1 + r2, rs );
 }
 
 unittest
@@ -163,14 +163,14 @@ unittest
     auto a = vec3(1,2,3);
     auto b = vec3(2,3,4);
     auto r1 = fRay( a, b );
-    assert( r1.start == a );
-    assert( r1.end == a + b );
+    assertEq( r1.start, a );
+    assertEq( r1.end, a + b );
     r1.start = b;
-    assert( r1.start == b );
+    assertEq( r1.start, b );
     r1.start = a;
-    assert( r1.len == b.len );
+    assertEq( r1.len, b.len );
     r1.end = a;
-    assert( r1.len == 0 );
+    assertEq( r1.len, 0 );
 }
 
 unittest
@@ -187,7 +187,7 @@ unittest
     auto tb = (mtr * vec4(s.end,1)).xyz;
     auto ts = s.tr( mtr );
 
-    assert( eq( ts.start, ta ) );
+    assertEq( ts.start, ta );
     assert( eq_approx( ts.end, tb, 1e-5 ) );
 }
 
@@ -197,8 +197,8 @@ unittest
     auto s = fRay( vec3(2,0,0), vec3(-4,4,0) );
     auto p = vec3( 0,0,0 );
     auto r = s.altitude(p);
-    assert( eq( p, r.end ) );
-    assert( eq( r.pos, vec3(1,1,0) ) );
+    assertEq( p, r.end );
+    assertEq( r.pos, vec3(1,1,0) );
 }
 
 unittest
@@ -206,7 +206,7 @@ unittest
     auto s = fRay( vec3(2,0,0), vec3(0,4,0) );
     auto p = vec3( 0,0,0 );
     auto r = s.altitude(p).len;
-    assert( r == 2.0f );
+    assertEq( r, 2.0f );
 }
 
 unittest
@@ -216,9 +216,9 @@ unittest
     auto a1 = s1.altitude(s2);
     auto a2 = s2.altitude(s1);
     assert( eq_seg( a1, a2.revert ) );
-    assert( a1.len == 2 );
-    assert( eq( a1.pos, vec3(1,1,1) ) );
-    assert( eq( a1.dir, vec3(0,0,-2) ) );
+    assertEq( a1.len, 2 );
+    assertEq( a1.pos, vec3(1,1,1) );
+    assertEq( a1.dir, vec3(0,0,-2) );
 }
 
 ///
@@ -236,6 +236,6 @@ unittest
 {
     auto s1 = fRay( vec3(0,0,0), vec3(2,2,0) );
     auto s2 = fRay( vec3(2,0,0), vec3(-4,4,0) );
-    assert( eq( s1.intersect(s2), s2.intersect(s1) ) );
-    assert( eq( s1.intersect(s2), vec3(1,1,0) ) );
+    assertEq( s1.intersect(s2), s2.intersect(s1) );
+    assertEq( s1.intersect(s2), vec3(1,1,0) );
 }

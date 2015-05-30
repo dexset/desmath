@@ -89,5 +89,5 @@ unittest
     auto v = vec3(1,0,0);
     auto e = vec3(0,1,0);
     auto r = q.rot(v);
-    assert( eq( r, e ) );
+    assertEq( r, e );
 }

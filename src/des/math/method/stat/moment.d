@@ -18,7 +18,7 @@ in { assert( arr.length > 0 ); } body
 unittest
 {
     auto a = [ 1.0f, 2, 3 ];
-    assert( a.mean == 2.0f );
+    assertEq( a.mean, 2.0f );
 
     static assert( !__traits(compiles,[1,2,3].mean) );
     static assert(  __traits(compiles,[1.0f,2,3].mean) );
@@ -30,7 +30,7 @@ unittest
     import des.math.linear.vector;
 
     auto a = [ vec3(1,2,3), vec3(2,3,4), vec3(3,4,5) ];
-    assert( a.mean == vec3(2,3,4) );
+    assertEq( a.mean, vec3(2,3,4) );
 }
 
 ///
@@ -52,10 +52,10 @@ in { assert( arr.length > 1 ); } body
 unittest
 {
     auto a = [ 1.0f, 1, 1 ];
-    assert( a.variance == 0.0f );
+    assertEq( a.variance, 0.0f );
 
     auto b = [ 1.0f, 2, 3 ];
-    assert( b.variance == 1.0f );
+    assertEq( b.variance, 1.0f );
 }
 
 ///
@@ -64,7 +64,7 @@ unittest
     import des.math.linear.vector;
 
     auto a = [ vec3(1,2,3), vec3(2,3,4), vec3(3,4,5) ];
-    assert( a.variance == vec3(1,1,1) );
+    assertEq( a.variance, vec3(1,1,1) );
 }
 
 /++ returns:
@@ -88,10 +88,10 @@ in { assert( arr.length > 1 ); } body
 unittest
 {
     auto a = [ 1.0f, 1, 1 ];
-    assert( a.mean_variance == [ 1.0f, 0.0f ] );
+    assertEq( a.mean_variance, [ 1.0f, 0.0f ] );
 
     auto b = [ 1.0f, 2, 3 ];
-    assert( b.mean_variance == [ 2.0f, 1.0f ] );
+    assertEq( b.mean_variance, [ 2.0f, 1.0f ] );
 }
 
 ///
@@ -100,7 +100,7 @@ unittest
     import des.math.linear.vector;
 
     auto a = [ vec3(1,2,3), vec3(2,3,4), vec3(3,4,5) ];
-    assert( a.mean_variance == [ vec3(2,3,4), vec3(1,1,1) ] );
+    assertEq( a.mean_variance, [ vec3(2,3,4), vec3(1,1,1) ] );
 }
 
 ///
@@ -122,8 +122,8 @@ in { assert( arr.length > 0 ); } body
 unittest
 {
     auto a = [ 1.0f, 2 ];
-    assert( a.rawMoment == 1.5 );
-    assert( a.rawMoment(2) == 2.5 );
+    assertEq( a.rawMoment, 1.5 );
+    assertEq( a.rawMoment(2), 2.5 );
 }
 
 ///
@@ -143,12 +143,12 @@ if( is( typeof( T.init / T.init ) == T ) && is( typeof( T.init * T.init ) == T )
 unittest
 {
     import des.math.linear.vector;
-    assert( spow( vec3( 1, 2, 3 ), 3 ) == vec3( 1, 8, 27 ) );
-    assert( spow( 10, 0 ) == 1 );
-    assert( spow( 10, 1 ) == 10 );
-    assert( spow( 10, 2 ) == 100 );
-    assert( spow( 10, 3 ) == 1000 );
-    assert( spow( 10, 4 ) == 10000 );
+    assertEq( spow( vec3( 1, 2, 3 ), 3 ), vec3( 1, 8, 27 ) );
+    assertEq( spow( 10, 0 ), 1 );
+    assertEq( spow( 10, 1 ), 10 );
+    assertEq( spow( 10, 2 ), 100 );
+    assertEq( spow( 10, 3 ), 1000 );
+    assertEq( spow( 10, 4 ), 10000 );
 }
 
 ///
@@ -170,9 +170,9 @@ in { assert( arr.length > 0 ); } body
 unittest
 {
     auto a = [ 1.0f, 2, 3, 4 ];
-    assert( a.centralMoment(1) == 0 );
-    assert( a.centralMoment(2) == 1.25 );
-    assert( a.centralMoment(3) == 0 );
+    assertEq( a.centralMoment(1), 0 );
+    assertEq( a.centralMoment(2), 1.25 );
+    assertEq( a.centralMoment(3), 0 );
 }
 
 ///

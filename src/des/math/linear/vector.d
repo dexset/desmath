@@ -433,28 +433,28 @@ alias Vector!(0,real)   rvecD;
 
 unittest
 {
-    static assert(  isVector!vec2 );
-    static assert(  isVector!vec3 );
-    static assert(  isVector!vec4 );
-    static assert(  isVector!dvec2 );
-    static assert(  isVector!dvec3 );
-    static assert(  isVector!dvec4 );
-    static assert(  isVector!ivec2 );
-    static assert(  isVector!ivec3 );
-    static assert(  isVector!ivec4 );
-    static assert(  isVector!vecD );
-    static assert(  isVector!ivecD );
-    static assert(  isVector!dvecD );
+    static assert( isVector!vec2 );
+    static assert( isVector!vec3 );
+    static assert( isVector!vec4 );
+    static assert( isVector!dvec2 );
+    static assert( isVector!dvec3 );
+    static assert( isVector!dvec4 );
+    static assert( isVector!ivec2 );
+    static assert( isVector!ivec3 );
+    static assert( isVector!ivec4 );
+    static assert( isVector!vecD );
+    static assert( isVector!ivecD );
+    static assert( isVector!dvecD );
 
-    static assert(  isSpecVector!(2,float,vec2) );
-    static assert(  isSpecVector!(3,float,vec3) );
-    static assert(  isSpecVector!(4,float,vec4) );
-    static assert(  isSpecVector!(2,double,dvec2) );
-    static assert(  isSpecVector!(3,double,dvec3) );
-    static assert(  isSpecVector!(4,double,dvec4) );
-    static assert(  isSpecVector!(2,int,ivec2) );
-    static assert(  isSpecVector!(3,int,ivec3) );
-    static assert(  isSpecVector!(4,int,ivec4) );
+    static assert( isSpecVector!(2,float,vec2) );
+    static assert( isSpecVector!(3,float,vec3) );
+    static assert( isSpecVector!(4,float,vec4) );
+    static assert( isSpecVector!(2,double,dvec2) );
+    static assert( isSpecVector!(3,double,dvec3) );
+    static assert( isSpecVector!(4,double,dvec4) );
+    static assert( isSpecVector!(2,int,ivec2) );
+    static assert( isSpecVector!(3,int,ivec3) );
+    static assert( isSpecVector!(4,int,ivec4) );
 }
 
 ///
@@ -478,21 +478,23 @@ unittest
 ///
 unittest
 {
-    assert( eq( Vector!(3,float)(1,2,3), [1,2,3] ) );
+    assertEq( Vector!(3,float)(1,2,3), [1,2,3] );
 
     auto a = Vector!(3,float)(1,2,3);
-    assert( eq( Vector!(5,int)(0,a,4), [0,1,2,3,4] ) );
+    assertEq( Vector!(5,int)(0,a,4), [0,1,2,3,4] );
 
     static assert( !__traits(compiles, { auto v = Vector!(2,int)(1,2,3); } ) );
-    assert( !mustExcept( { auto v = Vector!(0,int)(1,2,3); } ) );
-    assert( !mustExcept( { auto v = Vector!(3,int)(1); } ) );
+
+    { auto v = Vector!(0,int)(1,2,3); } // no exception
+    { auto v = Vector!(3,int)(1); } // no exception
+
     auto b = Vector!(0,float)(1,2,3);
-    assert( b.length == 3 );
-    
+    assertEq( b.length, 3 );
+
     auto c = Vector!(3,float)(1);
-    assert( eq( c, [1,1,1] ) );
+    assertEq( c, [1,1,1] );
     auto d = c;
-    assert( eq( c, d ) );
+    assertEq( c, d );
 }
 
 ///
@@ -525,10 +527,10 @@ unittest
     auto a11 = shared const vec3(1,2,3);
     auto a12 = shared const vec3(1);
 
-    assert( eq( a, a1 ) );
-    assert( eq( a, a4 ) );
-    assert( eq( a, a7 ) );
-    assert( eq( a, a10 ) );
+    assertEq( a, a1 );
+    assertEq( a, a4 );
+    assertEq( a, a7 );
+    assertEq( a, a10 );
 
     a = vec3(a4.data);
 }
@@ -538,27 +540,27 @@ unittest
 {
     auto a = ivec2(1,2);
     auto b = vec2(a);
-    assert( eq( a, b ) );
+    assertEq( a, b );
     auto c = ivec2(b);
-    assert( eq( a, c ) );
+    assertEq( a, c );
 }
 
 unittest
 {
     auto a = vec3(2);
-    assert( eq( -a, [-2,-2,-2] ) );
+    assertEq( -a, [-2,-2,-2] );
 }
 
 ///
 unittest
 {
     auto a = Vector!(3,int)(1,2,3);
-    assert( a.x == a.r );
-    assert( a.y == a.g );
-    assert( a.z == a.b );
-    assert( a.x == a.u );
-    assert( a.y == a.v );
-    assert( a.z == a.t );
+    assertEq( a.x, a.r );
+    assertEq( a.y, a.g );
+    assertEq( a.z, a.b );
+    assertEq( a.x, a.u );
+    assertEq( a.y, a.v );
+    assertEq( a.z, a.t );
 }
 
 ///
@@ -566,13 +568,13 @@ unittest
 {
     auto a = vec3(1,2,3);
 
-    assert( a.opDispatch!"x" == 1 );
-    assert( a.y == 2 );
-    assert( a.z == 3 );
+    assertEq( a.opDispatch!"x", 1 );
+    assertEq( a.y, 2 );
+    assertEq( a.z, 3 );
 
     a.opDispatch!"x" = 2;
     a.x = 2;
-    assert( a.x == 2 );
+    assertEq( a.x, 2 );
 }
 
 ///
@@ -588,9 +590,9 @@ unittest
     static assert( is(typeof(c) == Vector!(2,float) ) );
     static assert( is(typeof(d) == Vector!(8,float) ) );
 
-    assert( eq( b, [1,2] ) );
-    assert( eq( c, [1,1] ) );
-    assert( eq( d, [1,1,1,2,2,3,2,1] ) );
+    assertEq( b, [1,2] );
+    assertEq( c, [1,1] );
+    assertEq( d, [1,1,1,2,2,3,2,1] );
 }
 
 ///
@@ -600,17 +602,17 @@ unittest
     auto b = dvec4(4,5,6,7);
     auto c = vecD( 9, 10 );
     a.opDispatch!"xz"( b.yw );
-    assert( eq( a, [5,2,7] ) );
+    assertEq( a, [5,2,7] );
     a.zy = c;
-    assert( eq( a, [5,10,9] ) );
+    assertEq( a, [5,10,9] );
     static assert( !__traits(compiles, a.xy=vec3(1,2,3)) );
     static assert( !__traits(compiles, a.xx=vec2(1,2)) );
     auto d = a.zxy = b.wyx;
     static assert( is( d.datatype == double ) );
-    assert( eq( d, [ 7,5,4 ] ) );
-    assert( eq( a, [ 5,4,7 ] ) );
+    assertEq( d, [ 7,5,4 ] );
+    assertEq( a, [ 5,4,7 ] );
     a.yzx = a.zxz;
-    assert( eq( a, [ 7,7,5 ] ) );
+    assertEq( a, [ 7,7,5 ] );
 }
 
 ///
@@ -628,17 +630,17 @@ unittest
     assert( is( typeof(c1) == vec3 ) );
     auto d1 = ivec3(f) + ivec3(a);
     assert( is( typeof(d1) == ivec3 ) );
-    assert( eq(c1,d) );
-    assert( eq(c,d1) );
+    assertEq(c1,d);
+    assertEq(c,d1);
 
     a *= 2;
     b *= 2;
     auto e = b *= 2;
-    assert( eq(a,[2,4,6]) );
-    assert( eq(b,a*2) );
+    assertEq(a,[2,4,6]);
+    assertEq(b,a*2);
 
     auto x = 2 * a;
-    assert( eq(x,[4,8,12]) );
+    assertEq(x,[4,8,12]);
 
     assert( !!x );
     x[0] = float.nan;
@@ -653,14 +655,14 @@ unittest
     auto b = vec3(a);
     auto c = vecD(b);
 
-    assert( eq( a, b ) );
-    assert( eq( a, c ) );
+    assertEq( a, b );
+    assertEq( a, c );
 }
 ///
 unittest
 {
     auto a = vec3(2,2,1);
-    assert( eq(a.rebase(vec3(2,0,0),vec3(0,2,0),vec3(0,0,2)), [1,1,.5] ) );
+    assertEq( a.rebase(vec3(2,0,0),vec3(0,2,0),vec3(0,0,2)), [1,1,.5] );
 }
 
 ///
@@ -681,7 +683,7 @@ unittest
     assert( is( typeof(n) == real ) );
 
     assert( is( typeof( vec3( 1, 2, 3 ).e ) == vec3 ) );
-    assert( abs( a.e.len - 1 ) < float.epsilon );
+    assertEq( a.e.len, 1 );
 }
 
 ///
@@ -691,7 +693,8 @@ unittest
 
     auto a = cvec3( 1-1i, 2, 3i );
     static assert( __traits(compiles, a.e) );
-    assert( !mustExcept({ auto k = a.e; }) );
+
+    { auto k = a.e; } // no exception
 }
 
 ///
@@ -703,49 +706,49 @@ unittest
     a *= 2;
     a += a;
 
-    assert( a[0][0] == 4 );
-    assert( a[1][1] == 4 );
-    assert( a[2][2] == 4 );
+    assertEq( a[0][0], 4 );
+    assertEq( a[1][1], 4 );
+    assertEq( a[2][2], 4 );
 
-    assert( a[0][1] == 0 );
-    assert( a[1][2] == 0 );
-    assert( a[2][1] == 0 );
+    assertEq( a[0][1], 0 );
+    assertEq( a[1][2], 0 );
+    assertEq( a[2][1], 0 );
 
     a ^^= 2;
 
-    assert( a[0][0] == 16 );
-    assert( a[1][1] == 16 );
-    assert( a[2][2] == 16 );
+    assertEq( a[0][0], 16 );
+    assertEq( a[1][1], 16 );
+    assertEq( a[2][2], 16 );
 
     auto b = -a;
 
-    assert( b[0][0] == -16 );
-    assert( b[1][1] == -16 );
-    assert( b[2][2] == -16 );
+    assertEq( b[0][0], -16 );
+    assertEq( b[1][1], -16 );
+    assertEq( b[2][2], -16 );
 }
 
 unittest
 {
     auto a = vecD(1,2,3);
     auto b = a;
-    assert( eq(a,b) );
+    assertEq(a,b);
     b[0] = 111;
-    assert( !eq(a,b) );
+    assertNotEq(a,b);
 
     vecD c;
     c = b;
-    assert( eq(c,b) );
+    assertEq(c,b);
     b[0] = 222;
-    assert( !eq(c,b) );
+    assertNotEq(c,b);
 }
 
 unittest
 {
     auto a = vec3(1,2,3);
     auto b = a;
-    assert( eq(a,b) );
+    assertEq(a,b);
     b[0] = 111;
-    assert( !eq(a,b) );
+    assertNotEq(a,b);
 }
 
 /// dot multiplication for compaitable vectors.
@@ -769,7 +772,7 @@ unittest
     auto a = vec3(1,2,3);
     auto b = vecD(1,2,3);
 
-    assert( eq( dot(a,b), 1+4+9 ) );
+    assertEq( dot(a,b), 1+4+9 );
 }
 
 bool hasCompMltAndSum(T,E)() pure
@@ -797,14 +800,14 @@ unittest
     auto y = vecD(0,1,0);
     auto z = vecD(0,0,1);
 
-    assert( eq( cross(x,y), z ) );
-    assert( eq( cross(y,z), x ) );
-    assert( eq( cross(y,x), -z ) );
-    assert( eq( cross(x,z), -y ) );
-    assert( eq( cross(z,x), y ) );
+    assertEq( cross(x,y), z );
+    assertEq( cross(y,z), x );
+    assertEq( cross(y,x), -z );
+    assertEq( cross(x,z), -y );
+    assertEq( cross(z,x), y );
 
     auto fy = vecD(0,1,0,0);
-    assert( mustExcept({ auto fz = x * fy; }) );
+    assertExcept({ auto fz = x * fy; });
     auto cfy = vec4(0,1,0,0);
     static assert( !__traits(compiles,x*cfy) );
 }
@@ -875,12 +878,12 @@ unittest
     }
 
     auto b = NF(1,100);
-    assert( b.near == b.n );
-    assert( b.far  == b.f );
+    assertEq( b.near, b.n );
+    assertEq( b.far, b.f );
 
     b.nf = ivec2( 10,20 );
-    assert( b.near == 10 );
-    assert( b.far == 20 );
+    assertEq( b.near, 10 );
+    assertEq( b.far, 20 );
 }
 
 unittest

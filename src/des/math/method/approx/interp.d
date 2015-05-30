@@ -7,6 +7,7 @@ import std.traits;
 
 version(unittest) import des.math.linear.vector;
 
+import des.ts;
 import des.math.combin;
 import des.stdx.traits : hasBasicMathOp;
 
@@ -48,11 +49,11 @@ unittest
         TT( 55, 25 )
         ];
 
-    assert( lineInterpolate( tbl, 0 ) == 10 );
-    assert( lineInterpolate( tbl, 5 ) == 14 );
-    assert( lineInterpolate( tbl, 10 ) == 18 );
-    assert( lineInterpolate( tbl, -10 ) == 10 );
-    assert( lineInterpolate( tbl, 80 ) == 25 );
+    assertEq( lineInterpolate( tbl, 0 ), 10 );
+    assertEq( lineInterpolate( tbl, 5 ), 14 );
+    assertEq( lineInterpolate( tbl, 10 ), 18 );
+    assertEq( lineInterpolate( tbl, -10 ), 10 );
+    assertEq( lineInterpolate( tbl, 80 ), 25 );
 }
 
 unittest
@@ -65,8 +66,8 @@ unittest
         TD( 2, 3 ),
         TD( 3, 4 )
         ];
-    assert( lineInterpolate( tbl, 5, true ) == 6 );
-    assert( lineInterpolate( tbl, -3, true ) == -3 );
+    assertEq( lineInterpolate( tbl, 5, true ), 6 );
+    assertEq( lineInterpolate( tbl, -3, true ), -3 );
 }
 
 unittest
@@ -79,10 +80,10 @@ unittest
         TC( 2, vec3(0,0,1) )
         ];
 
-    assert( lineInterpolate( tbl, -1 ) == vec3(1,0,0) );
-    assert( lineInterpolate( tbl, 0 ) == vec3(1,0,0) );
-    assert( lineInterpolate( tbl, 0.5 ) == vec3(0.5,0.5,0) );
-    assert( lineInterpolate( tbl, 3 ) == vec3(0,0,1) );
+    assertEq( lineInterpolate( tbl, -1 ), vec3(1,0,0) );
+    assertEq( lineInterpolate( tbl, 0 ), vec3(1,0,0) );
+    assertEq( lineInterpolate( tbl, 0.5 ), vec3(0.5,0.5,0) );
+    assertEq( lineInterpolate( tbl, 3 ), vec3(0,0,1) );
 }
 
 @property bool canBezierInterpolate(T,F)()
@@ -108,7 +109,7 @@ body
 unittest
 {
     auto pts = [ vec2(0,0), vec2(2,2), vec2(4,0) ];
-    assert( bezierInterpolation( pts, 0.5 ) == vec2(2,1) );
+    assertEq( bezierInterpolation( pts, 0.5 ), vec2(2,1) );
 }
 
 pure nothrow auto fixBezierSpline(T,F=float)( in T[] pts, size_t steps )
@@ -139,7 +140,7 @@ unittest
     auto fbi = new FixStepsBezierSplineInterpolator!(vec2)(len);
     auto pts = [ vec2(0,0), vec2(2,2), vec2(4,0) ];
     auto res = fbi( pts );
-    assert( res.length == len );
+    assertEq( res.length, len );
 }
 
 /+ функция критеря должна быть функцией хевисада +/
@@ -247,8 +248,8 @@ unittest
     auto pp = criteriaBezierSpline( pts, angleSplineCriteria!vec2(0.05) );
 
     assert( pp.length > pts.length );
-    assert( pp[0] == pts[0] );
-    assert( pp[$-1] == pts[$-1] );
+    assertEq( pp[0], pts[0] );
+    assertEq( pp[$-1], pts[$-1] );
 }
 
 unittest
@@ -257,6 +258,6 @@ unittest
     auto pp = filterBezierSpline( fixBezierSpline( pts, 1000 ), lengthSplineCriteria!vec2(0.05) );
 
     assert( pp.length > pts.length );
-    assert( pp[0] == pts[0] );
-    assert( pp[$-1] == pts[$-1] );
+    assertEq( pp[0], pts[0] );
+    assertEq( pp[$-1], pts[$-1] );
 }
