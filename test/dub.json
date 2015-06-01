@@ -1,7 +1,0 @@
-{
-    "name": "test",
-    "targetType": "executable",
-    "dflags": [ "-unittest" ],
-    "sourcePaths": [ "." ],
-    "dependencies" : { "desmath": { "path" : ".." } }
-}
