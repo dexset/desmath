@@ -1013,10 +1013,10 @@ unittest
     assertExcept({matDx3(1,2,3,4);});
     assertEq( a.height, 3 );
     assertEq( a.width, 3 );
-    assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
+    assertEq( a.data, [[1,2,3],[4,5,6],[7,8,9]] );
     assertExcept({ a.resize(2,2); });
     a.resize(2,3);
-    assertEq( a, [[1,2,3],[4,5,6]] );
+    assert( eq( a, [[1,2,3],[4,5,6]] ) );
     assertEq( a.height, 2 );
     a.fill(1);
     assertEq( a, [[1,1,1],[1,1,1]] );

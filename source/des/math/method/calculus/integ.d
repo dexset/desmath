@@ -98,7 +98,7 @@ unittest
     auto v = Point( vec3(10,3,1), vec3(5,4,3) );
 
     double time = 0, ft = 10, step = .01;
-    foreach( i; 0 .. cast(ulong)(ft/step+1) )
+    foreach( i; 0 .. 1000 )
         v = runge( v, &rpart, time+=step, step );
 
     assert( eq_approx( v.pos, vec3(60,43,31),  1e-3 ) );
