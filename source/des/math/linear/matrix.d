@@ -516,7 +516,7 @@ pure:
 
     ///
     bool opCast(E)() const if( is( E == bool ) )
-    { 
+    {
         foreach( v; asArray ) if( !isFinite(v) ) return false;
         return true;
     }
