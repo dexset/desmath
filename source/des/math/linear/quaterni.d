@@ -25,8 +25,12 @@ struct Quaterni(T) if( isFloatingPoint!T )
 
 pure:
     ///
-    this(E...)( in E vals ) if( is( typeof( vectype(vals) ) ) )
+    this(E...)( in E vals )
+        if( is( typeof( vectype(vals) ) ) )
     { data = vectype(vals); }
+
+    ///
+    this( in Quaterni!T q ) pure { data = q.data; }
 
     mixin accessByString!(4,T,"data.data","i j k a");
     mixin( BasicMathOp!"data" );

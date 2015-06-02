@@ -503,7 +503,7 @@ unittest
     static struct Test1 { float x,y,z; }
     static assert( !__traits(compiles,Vector!(3,float)(Test1.init)) );
 
-    static struct Test2 { float[3] data; }
+    static struct Test2 { float[3] data; alias data this; }
     static assert( __traits(compiles,Vector!(3,float)(Test2.init)) );
 }
 
@@ -691,7 +691,7 @@ unittest
 {
     alias Vector!(3,cfloat) cvec3;
 
-    auto a = cvec3( 1-1i, 2, 3i );
+    auto a = cvec3( 1-1i, 2+0i, 0+3i );
     static assert( __traits(compiles, a.e) );
 
     { auto k = a.e; } // no exception

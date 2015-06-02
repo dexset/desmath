@@ -6,7 +6,7 @@
     "targetType": "sourceLibrary",
     "dependencies":
     {
-        "dests" : "~>0.2.2",
-        "desstdx" : "~>0.1.0"
+        "dests" : "~>0.2.4",
+        "desstdx" : "~>0.1.2"
     }
 }
