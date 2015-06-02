@@ -1,20 +1,21 @@
 module des.math.method.calculus.integ;
 
 import des.ts;
-import des.stdx.traits : hasBasicMathOp;
+import des.stdx.traits;
 
 import std.math;
+import std.typetuple;
 
 ///
-T euler(T)( in T x, T delegate(in T,double) f, double time, double h )
-    if( hasBasicMathOp!T )
+T euler(T,E1,E2,E3)( in T x, T delegate(in T,E1) f, E2 time, E3 h )
+    if( hasBasicMathOp!T && allSatisfy!(isFloatingPoint,E1,E2,E3) )
 {
     return x + f( x, time ) * h;
 }
 
 ///
-T runge(T)( in T x, T delegate(in T,double) f, double time, double h )
-    if( hasBasicMathOp!T )
+T runge(T,E1,E2,E3)( in T x, T delegate(in T,E1) f, E2 time, E3 h )
+    if( hasBasicMathOp!T && allSatisfy!(isFloatingPoint,E1,E2,E3) )
 {
     T k1 = f( x, time ) * h;
     T k2 = f( x + k1 * 0.5, time + h * 0.5 ) * h;
@@ -30,16 +31,16 @@ unittest
 
     auto rpart( in double A, double time ) { return pa; }
 
-    foreach( i; 0 .. cast(ulong)(ft/step) )
+    foreach( i; 0 .. 1000 )
     {
         a1 = euler( a1, &rpart, time+=step, step );
         a2 = runge( a1, &rpart, time+=step, step );
     }
 
-    import std.math;
     auto va = ft * pa;
-    assert( eq_approx( va, a1, step * pa * 2 ) );
-    assert( eq_approx( va, a2, step * pa ) );
+
+    assertEqApprox( va, a1, step * pa * 2 );
+    assertEqApprox( va, a2, step * pa );
 
     auto rpart2( in float A, double time ) { return pa; }
 
@@ -73,7 +74,7 @@ unittest
 
     double t = 0, ft = 10, dt = 0.01;
 
-    foreach( i; 0 .. cast(size_t)(ft/dt) )
+    foreach( i; 0 .. 1000 )
     {
         state1 = euler( state1, &rpart, t+=dt, dt );
         state2 = runge( state2, &rpart, t+=dt, dt );

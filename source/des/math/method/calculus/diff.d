@@ -9,21 +9,18 @@ import des.ts;
 auto df(size_t N, size_t M, T, E=T)
     ( Vector!(M,T) delegate( in Vector!(N,T) ) f, in Vector!(N,T) p, E step=E.epsilon*10 )
     if( isFloatingPoint!T && isFloatingPoint!E )
+in { assert( f !is null ); } body
 {
     Matrix!(M,N,T) ret;
-
+    Vector!(N,T) p1, p2;
     T dstep = 2.0 * step;
+
     foreach( i; 0 .. N )
     {
-        Vector!(N,T) p1 = p;
+        p1 = p2 = p;
         p1[i] -= step;
-        Vector!(N,T) p2 = p;
         p2[i] += step;
-
-        auto r1 = f(p1);
-        auto r2 = f(p2);
-
-        ret.setCol( i, (r2-r1) / dstep );
+        ret.setCol( i, ( f(p2) - f(p1) ) / dstep );
     }
 
     return ret;
@@ -38,7 +35,7 @@ unittest
     auto res = df( &func, dvec2(18,9), 1e-5 );
     auto must = Matrix!(3,2,double)( 36, 0, 3, 3, 0, 0 );
 
-    assert( eq_approx( res.asArray, must.asArray, 1e-5 ) );
+    assertEqApprox( res.asArray, must.asArray, 1e-5 );
 }
 
 ///
@@ -57,7 +54,7 @@ unittest
     auto res1 = df( &pow2, 1 );
     auto res2 = df( &pow2, 3 );
     auto res3 = df( &pow2, -2 );
-    assert( eq_approx( res1, 2.0, 2e-6 ) );
-    assert( eq_approx( res2, 6.0, 2e-6 ) );
-    assert( eq_approx( res3, -4.0, 2e-6 ) );
+    assertEqApprox( res1, 2.0, 2e-6 );
+    assertEqApprox( res2, 6.0, 2e-6 );
+    assertEqApprox( res3, -4.0, 2e-6 );
 }
