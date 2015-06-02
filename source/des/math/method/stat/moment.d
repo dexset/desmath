@@ -1,17 +1,37 @@
 module des.math.method.stat.moment;
 
+import std.algorithm;
+import std.traits;
+import std.range;
+import std.string : format;
+
 import des.ts;
 
 /// expected value
-T mean(T)( in T[] arr ) pure nothrow @property @nogc
-if( is( typeof( T.init + T.init ) == T ) && is( typeof( T.init / 1UL ) == T ) )
-in { assert( arr.length > 0 ); } body
+auto mean(R)( R r ) pure nothrow @property @nogc
+if( isInputRange!R )
+in { assert( !r.empty ); } body
 {
-    if( arr.length == 1 ) return arr[0];
-    T res = arr[0];
-    foreach( i; 1 .. arr.length )
-        res = res + arr[i];
-    return res / arr.length;
+    alias T = Unqual!(ElementType!R);
+
+    static assert( canSumWithSelfAndMulWithFloat!T,
+            "range elements must can sum with selfs and mul with float" );
+
+    size_t cnt = 0;
+    T res = r.front * 0.0f; // neitral value for summate ( a + b*0 == a )
+    foreach( v; r )
+    {
+        res = res + v;
+        cnt++;
+    }
+    assert( cnt > 0, "no elements in range" );
+    return res * ( 1.0f / cnt );
+}
+
+template canSumWithSelfAndMulWithFloat(T)
+{
+    enum canSumWithSelfAndMulWithFloat = is( typeof( T.init + T.init ) == T ) &&
+                                         is( typeof( T.init * 0.0f ) == T );
 }
 
 ///
@@ -20,8 +40,13 @@ unittest
     auto a = [ 1.0f, 2, 3 ];
     assertEq( a.mean, 2.0f );
 
+    static assert( !__traits(compiles,mean(a[0])) );
     static assert( !__traits(compiles,[1,2,3].mean) );
     static assert(  __traits(compiles,[1.0f,2,3].mean) );
+
+    import std.conv : to;
+
+    assertEq( iota(11).map!(a=>to!float(a)).mean, 5 );
 }
 
 ///
@@ -34,18 +59,35 @@ unittest
 }
 
 ///
-T variance(T)( in T[] arr ) pure nothrow @property @nogc
-if( is( typeof( T.init + T.init ) == T ) &&
-    is( typeof( T.init - T.init ) == T ) &&
-    is( typeof( T.init * T.init ) == T ) &&
-    is( typeof( T.init / 1UL ) == T ) )
-in { assert( arr.length > 1 ); } body
+auto variance(bool return_mean=false,R)( R r ) pure nothrow @property @nogc
+if( isInputRange!R )
 {
-    T res = arr[0] - arr[0];
-    auto m = arr.mean;
-    foreach( val; arr )
-        res = res + ( m - val ) * ( m - val );
-    return res / ( arr.length - 1 );
+    alias T = Unqual!(ElementType!R);
+
+    static assert( canSumWithSelfAndMulWithFloat!T,
+            "range elements must can sum with selfs and mul with float" );
+
+    T res = r.front * 0.0f; // neitral value for summate ( a + b*0 == a )
+    size_t cnt = 0;
+    auto m = r.mean;
+    T buf;
+    foreach( val; r )
+    {
+        static if( is( typeof( T.init - T.init ) == T ) )
+            buf = m - val;
+        else
+            buf = m + val * (-1.0f);
+
+        res = res + buf * buf;
+        cnt++;
+    }
+
+    assert( cnt > 1, "only one elements in range, must be greater 1" );
+
+    static if( return_mean )
+        return cast(T[2])[ m, res * ( 1.0f / (cnt-1) ) ];
+    else
+        return res * ( 1.0f / (cnt-1) );
 }
 
 ///
@@ -70,19 +112,8 @@ unittest
 /++ returns:
     mean (0 element), variance (1 element)
 +/
-T[2] mean_variance(T)( in T[] arr ) pure nothrow @property @nogc
-if( is( typeof( T.init + T.init ) == T ) &&
-    is( typeof( T.init - T.init ) == T ) &&
-    is( typeof( T.init * T.init ) == T ) &&
-    is( typeof( T.init / 1UL ) == T ) )
-in { assert( arr.length > 1 ); } body
-{
-    T res = arr[0] - arr[0];
-    auto m = arr.mean;
-    foreach( val; arr )
-        res = res + ( m - val ) * ( m - val );
-    return [ m, res / ( arr.length - 1 ) ];
-}
+auto mean_variance(R)( R r ) pure nothrow @property @nogc
+if( isInputRange!R ) { return variance!true(r); }
 
 ///
 unittest
@@ -104,18 +135,23 @@ unittest
 }
 
 ///
-T rawMoment(T)( in T[] arr, size_t k=1 ) pure nothrow @property @nogc
-if( is( typeof( T.init + T.init ) == T ) &&
-    is( typeof( T.init * T.init ) == T ) &&
-    is( typeof( T.init / T.init ) == T ) &&
-    is( typeof( T.init / 1UL ) == T ) )
-in { assert( arr.length > 0 ); } body
+auto rawMoment(R)( R r, size_t k=1 ) pure nothrow @property @nogc
+if( isInputRange!R )
+in { assert( !r.empty ); } body
 {
-    if( arr.length == 1 ) return spow( arr[0], k );
-    T res = arr[0];
-    foreach( i; 1 .. arr.length )
-        res = res + spow( arr[i], k );
-    return res / arr.length;
+    alias T = Unqual!(ElementType!R);
+
+    static assert( canSumWithSelfAndMulWithFloat!T,
+            "range elements must can sum with selfs and mul with float" );
+
+    T res = r.front * 0.0f;
+    size_t cnt = 0;
+    foreach( v; r )
+    {
+        res = res + spow( v, k );
+        cnt++;
+    }
+    return res * ( 1.0f / cnt );
 }
 
 ///
@@ -126,17 +162,35 @@ unittest
     assertEq( a.rawMoment(2), 2.5 );
 }
 
-///
-T spow(T)( in T val, size_t k ) pure nothrow @nogc
+/// power ( works with vectors )
+T spow(T)( in T val, size_t k )
 if( is( typeof( T.init / T.init ) == T ) && is( typeof( T.init * T.init ) == T ) )
 {
-    //TODO: optimize
-    T ret = val / val;
-    if( k == 0 ) return ret;
+    if( k == 0 ) return val / val;
     if( k == 1 ) return val;
     if( k == 2 ) return val * val;
-    foreach( i; 0 .. k ) ret = ret * val;
+
+    /+ small types (numbers,vectors)
+     + recursion is faster
+     + on BigInt logarifmic is faster
+     +/
+
+    // recursion
+    T ret = spow( val*val, k/2 );
+    if( k % 2 ) ret = ret * val;
     return ret;
+
+    // logarifmic
+    //auto n = k;
+    //T buf = val / val;
+    //T ret = val;
+    //while( n > 1 )
+    //{
+    //    if( n % 2 ) buf = buf * ret;
+    //    ret = ret * ret;
+    //    n /= 2;
+    //}
+    //return ret * buf;
 }
 
 ///
@@ -144,26 +198,35 @@ unittest
 {
     import des.math.linear.vector;
     assertEq( spow( vec3( 1, 2, 3 ), 3 ), vec3( 1, 8, 27 ) );
-    assertEq( spow( 10, 0 ), 1 );
-    assertEq( spow( 10, 1 ), 10 );
-    assertEq( spow( 10, 2 ), 100 );
-    assertEq( spow( 10, 3 ), 1000 );
-    assertEq( spow( 10, 4 ), 10000 );
+    foreach( i; 0 .. 16 ) assertEq( spow( 10, i ), 10 ^^ i,
+            format( "spow fails (%%s != %%s) with i: %s",  i ) );
 }
 
 ///
-T centralMoment(T)( in T[] arr, size_t k=1 ) pure nothrow @property @nogc
-if( is( typeof( T.init + T.init ) == T ) &&
-    is( typeof( T.init * T.init ) == T ) &&
-    is( typeof( T.init / T.init ) == T ) &&
-    is( typeof( T.init / 1UL ) == T ) )
-in { assert( arr.length > 0 ); } body
+auto centralMoment(R)( R r, size_t k=1 ) pure nothrow @property @nogc
+if( isInputRange!R )
 {
-    T res = arr[0] - arr[0];
-    auto m = arr.mean;
-    foreach( val; arr )
-        res = res + spow( val - m, k );
-    return res / arr.length;
+    alias T = Unqual!(ElementType!R);
+
+    static assert( canSumWithSelfAndMulWithFloat!T,
+            "range elements must can sum with selfs and mul with float" );
+
+    T res = r.front * 0.0f; // neitral value for summate ( a + b*0 == a )
+    size_t cnt = 0;
+    auto m = r.mean;
+    T buf;
+    foreach( val; r )
+    {
+        static if( is( typeof( T.init - T.init ) == T ) )
+            buf = val - m;
+        else
+            buf = val + m * (-1.0f);
+
+        res = res + spow( buf, k );
+        cnt++;
+    }
+
+    return res * ( 1.0f / cnt );
 }
 
 ///
@@ -180,55 +243,49 @@ class MovingAverage(T) if( is(typeof(T[].init.mean)) )
 {
     ///
     T[] array;
-    ///
-    size_t cur_index = 0;
-    ///
-    size_t max_length = 1;
+
+    size_t cur = 0;
+    size_t fill = 0;
 
     ///
-    this( size_t mlen ) { max_length = mlen; }
+    this( size_t mlen ) { array.length = mlen; }
 
     invariant()
     {
-        assert( array.length <= max_length );
+        assert( array.length > 0 );
+        assert( array.length >= fill );
     }
 
     ///
-    void append( in T val )
+    void put( in T val )
     {
-        if( array.length < max_length ) array ~= val;
-        else array[cur_index++%max_length] = val;
-    }
-
-    @property
-    {
-        ///
-        size_t maxLength() const { return max_length; }
-        ///
-        void maxLength( size_t mlen )
+        if( array.length > fill )
         {
-            max_length = mlen;
-            if( array.length > mlen )
-                array.length = mlen;
+            array[fill] = val;
+            cur++;
+            fill++;
         }
-
-        ///
-        T avg() const { return array.mean; }
+        else array[cur++%$] = val;
     }
+
+    ///
+    T avg() const @property
+    { return array[0..fill].mean; }
 }
 
+///
 unittest
 {
     auto ma = new MovingAverage!float( 3 );
     mustExcept!AssertError({ ma.avg; });
-    ma.append( 1 );
+    ma.put( 1 );
     assertEq( ma.avg, 1 );
-    ma.append( 1 );
+    ma.put( 1 );
     assertEq( ma.avg, 1 );
-    ma.append( 4 );
+    ma.put( 4 );
     assertEq( ma.avg, 2 );
-    ma.append( 4 );
-    ma.append( 4 );
+    ma.put( 4 );
+    ma.put( 4 );
     assertEq( ma.avg, 4 );
     assertEq( ma.array.length, 3 );
 }
