@@ -3,7 +3,7 @@
 [![Join the chat at https://gitter.im/dexset/discussion](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dexset/discussion)
 
 #### linear
-`des.math.linear`
+`des.math.linear` vector, matrix, quaternion
 
 #### combinatorics
 `des.math.combin`
