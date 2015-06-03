@@ -65,7 +65,7 @@ unittest
 }
 
 /// equals to fact(n) / fact(n-k)
-pure nothrow long partial_permutation( long n, long k )
+long partialPermutation( long n, long k ) pure nothrow
 in
 {
     assert( k > 0 );
@@ -90,6 +90,6 @@ unittest
     { return fact(n) / fact( n-k ); }
 
     foreach( k; 1 .. 10 )
-        assertEq( partial_permutation(10,k), perm2(10,k),
+        assertEq( partialPermutation(10,k), perm2(10,k),
                   format( "equal test fails with k==%d, %%s != %%s", k ) );
 }
