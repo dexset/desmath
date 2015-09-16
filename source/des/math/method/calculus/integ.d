@@ -4,7 +4,7 @@ import des.ts;
 import des.stdx.traits;
 
 import std.math;
-import std.typetuple;
+import std.meta;
 
 ///
 T euler(T,E1,E2,E3)( in T x, T delegate(in T,E1) f, E2 time, E3 h )

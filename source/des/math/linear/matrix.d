@@ -355,8 +355,8 @@ pure:
          +/
         ref typeof(this) resize( size_t nh, size_t nw )
         {
-            static if( isStaticHeight ) enforce( nh == H, "height is static" );
-            static if( isStaticWidth ) enforce( nw == W, "width is static" );
+            static if( isStaticHeight ) enforce!Exception( nh == H, "height is static" );
+            static if( isStaticWidth ) enforce!Exception( nw == W, "width is static" );
 
             static if( isDynamicHeight ) data.length = nh;
             static if( isDynamicWidth )
@@ -599,7 +599,7 @@ pure:
         if( op=="*" && allowSomeOp(W,K) && isValidOp!("*",E,X) && isValidOp!("+",E,E) )
     {
         static if( isDynamic || v.isDynamic )
-            enforce( width == v.length, "wrong vector length" );
+            enforce( width == v.data.length, "wrong vector length" );
 
         Vector!(H,E) ret;
 
@@ -1010,11 +1010,11 @@ unittest
 unittest
 {
     auto a = matDx3( 1,2,3,4,5,6,7,8,9 );
-    assertExcept({matDx3(1,2,3,4);});
+    assertThrown( matDx3(1,2,3,4) );
     assertEq( a.height, 3 );
     assertEq( a.width, 3 );
     assertEq( a.data, [[1,2,3],[4,5,6],[7,8,9]] );
-    assertExcept({ a.resize(2,2); });
+    assertThrown( a.resize(2,2) );
     a.resize(2,3);
     assert( eq( a, [[1,2,3],[4,5,6]] ) );
     assertEq( a.height, 2 );
@@ -1032,11 +1032,11 @@ unittest
 unittest
 {
     auto a = mat3xD( 1,2,3,4,5,6,7,8,9 );
-    assertExcept({mat3xD(1,2,3,4);});
+    assertThrown( mat3xD(1,2,3,4) );
     assertEq( a.height, 3 );
     assertEq( a.width, 3 );
     assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
-    assertExcept({ a.resize(2,2); });
+    assertThrown( a.resize(2,2) );
     a.resize(3,2);
     assertEq( a, [[1,2],[4,5],[7,8]] );
     assertEq( a.width, 2 );
@@ -1050,7 +1050,7 @@ unittest
 unittest
 {
     auto a = matD( 3,3, 1,2,3,4,5,6,7,8,9 );
-    assertExcept({ matD(1,2,3,4,5); });
+    assertThrown( matD(1,2,3,4,5) );
     assertEq( a.height, 3 );
     assertEq( a.width, 3 );
     assertEq( a, [[1,2,3],[4,5,6],[7,8,9]] );
@@ -1090,7 +1090,7 @@ unittest
     a = b;
     assertEq( a, b );
     b.height = 4;
-    assertExcept({ a = b; });
+    assertThrown( a = b );
     { b = a; } // no except
 }
 
@@ -1243,7 +1243,7 @@ unittest
     alias Matrix!(4,5,float) mat4x5;
 
     auto a = mat2x4.init * mat4xD.init;
-    assertExcept({ mat4xD.init * mat2x4.init; });
+    assertThrown( mat4xD.init * mat2x4.init );
     auto b = mat2x4.init * mat4x5.init;
 
     static assert( is( typeof(a) == Matrix!(2,0,float) ) );
@@ -1321,7 +1321,7 @@ unittest
         assertEq( sm.width, 2 );
         assertEq( sm.height, 2 );
         assertEq( sm, [ [5,8], [9,12] ] );
-        assertExcept({ mtr.sub( [0,4], [1,2] ); });
+        assertThrown( mtr.sub( [0,4], [1,2] ) );
         auto sm2 = mtr.subWithout( [], [1,2] );
         assertEq( sm2.width, 2 );
         assertEq( sm2.height, 4 );

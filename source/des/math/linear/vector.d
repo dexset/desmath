@@ -5,7 +5,7 @@ module des.math.linear.vector;
 
 import std.exception;
 import std.traits;
-import std.typetuple;
+import std.meta;
 import std.string;
 import std.math;
 import std.algorithm;
@@ -105,21 +105,15 @@ struct Vector(size_t N,T)
 
 pure:
 
-    static if( isDynamic )
+    static if( isStatic ) enum length = N;
+    else
     {
         @property
         {
-            /++
-                Length of elements.
-                Enum, if vector `isStatic`.
-            +/
-            auto length() const { return data.length; }
-
-            ///ditto
-            auto length( size_t nl ) { data.length = nl; return nl; }
+            size_t length() const { return data.length; }
+            void length( size_t nl ) { data.length = nl; }
         }
     }
-    else enum length = N;
 
     /++
      + Vector can be constructed with different ways:
@@ -167,34 +161,13 @@ pure:
                 auto d = flatData!T(vals);
                 foreach( i, ref val; ret.data ) val = d[i%$];
             }
-            else
-            {
-                static if( isNumeric!T ) ret.data[] = 0;
-            }
-            return ret;
-        }
-
-        ///
-        static selftype fillOne(E...)( size_t K, in E vals )
-        {
-            selftype ret;
-            ret.length = K;
-            if( E.length )
-            {
-                auto d = flatData!T(vals);
-                foreach( i; 0 .. K )
-                    ret.data[i] = d[min(i,$-1)];
-            }
-            else
-            {
-                static if( isNumeric!T ) ret.data[] = 0;
-            }
+            else static if( isNumeric!T ) ret.data[] = 0;
             return ret;
         }
     }
 
     ///
-    auto opAssign(size_t K,E)( in Vector!(K,E) b )
+    auto opAssign(size_t K,E)( auto ref const(Vector!(K,E)) b )
         if( (K==N||K==0||N==0) && is( typeof(T(E.init)) ) )
     {
         static if( isDynamic ) length = b.length;
@@ -227,7 +200,7 @@ pure:
     /++
      + Any binary operations execs per element
      +/
-    auto opBinary(string op,size_t K,E)( in Vector!(K,E) b ) const
+    auto opBinary(string op,size_t K,E)( auto ref const(Vector!(K,E)) b ) const
         if( isValidOp!(op,T,E) && (K==N||K==0||N==0) )
     {
         selftype ret;
@@ -240,7 +213,7 @@ pure:
     }
 
     /// ditto
-    auto opBinary(string op,E)( in E b ) const
+    auto opBinary(string op,E)( auto ref const(E) b ) const
         if( isValidOp!(op,T,E) && op != "+" && op != "-" )
     {
         selftype ret;
@@ -251,12 +224,12 @@ pure:
     }
 
     /// ditto
-    auto opOpAssign(string op, E)( in E b )
+    auto opOpAssign(string op, E)( auto ref const(E) b )
         if( mixin( `is( typeof( this ` ~ op ~ ` b ) )` ) )
     { mixin( `return this = this ` ~ op ~ ` b;` ); }
 
     /// only mul allowed
-    auto opBinaryRight(string op, E)( in E b ) const
+    auto opBinaryRight(string op, E)( auto ref const(E) b ) const
         if( isValidOp!(op,E,T,T) && op == "*" )
     { mixin( "return this " ~ op ~ " b;" ); }
 
@@ -272,40 +245,43 @@ pure:
     ///
     E opCast(E)() if( is( T[] == E ) ) { return data.dup; }
 
-    const @property
+    static if( is( typeof( T.init * T.init ) == T ) &&
+               is( typeof( T.init + T.init ) == T ) )
     {
-        static if( is( typeof( dot( selftype.init, selftype.init ) ) ) )
+        private alias __ftype = CommonType!(T,float);
+
+        const @property
         {
-            /++ Square of euclidean length of the vector.
+            /++ Square of euclidean length of the vector
 
                 only:
                 if( is( typeof( dot(selftype.init,selftype.init) ) ) )
             +/
             auto len2() { return dot(this,this); }
 
-            static if( is( typeof( sqrt(CommonType!(T,float)(this.len2)) ) ) )
+            static if( is( typeof( sqrt( __ftype(this.len2) ) ) ) )
             {
                 /++ Euclidean length of the vector
 
                     only:
                     if( is( typeof( sqrt(CommonType!(T,float)(this.len2)) ) ) )
                 +/
-                auto len(E=CommonType!(T,float))() { return sqrt( E(len2) ); }
-            }
+                auto len(E=__ftype)() { return sqrt( E(len2) ); }
 
-            static if( is( typeof( this / len ) == typeof(this) ) )
-            {
-                /++ normalized vector
+                static if( isValidOp!("/",T,__ftype) )
+                {
+                    /++ normalized vector
 
-                    only:
-                    if( is( typeof( this / len ) == typeof(this) ) )
-                +/
-                auto e() { return this / len; }
+                        only:
+                        if( isValidOp!("/",T,__ftype) )
+                    +/
+                    auto e() { return this / len; }
+                }
             }
         }
     }
 
-    auto rebase(Args...)( Args e ) const
+    auto rebase(Args...)( auto ref const(Args) e ) const
         if( allSatisfy!(isCompatible,Args) && Args.length == N )
     {
         auto m = Matrix!(N,N,T)(e).T.inv;
@@ -478,10 +454,10 @@ unittest
 ///
 unittest
 {
-    assertEq( Vector!(3,float)(1,2,3), [1,2,3] );
+    assert( eq( Vector!(3,float)(1,2,3), [1,2,3] ) );
 
     auto a = Vector!(3,float)(1,2,3);
-    assertEq( Vector!(5,int)(0,a,4), [0,1,2,3,4] );
+    assert( eq( Vector!(5,int)(0,a,4), [0,1,2,3,4] ) );
 
     static assert( !__traits(compiles, { auto v = Vector!(2,int)(1,2,3); } ) );
 
@@ -489,12 +465,12 @@ unittest
     { auto v = Vector!(3,int)(1); } // no exception
 
     auto b = Vector!(0,float)(1,2,3);
-    assertEq( b.length, 3 );
+    assert( eq( b.length, 3 ) );
 
     auto c = Vector!(3,float)(1);
-    assertEq( c, [1,1,1] );
+    assert( eq( c, [1,1,1] ) );
     auto d = c;
-    assertEq( c, d );
+    assert( eq( c, d ) );
 }
 
 ///
@@ -527,11 +503,6 @@ unittest
     auto a11 = shared const vec3(1,2,3);
     auto a12 = shared const vec3(1);
 
-    assertEq( a, a1 );
-    assertEq( a, a4 );
-    assertEq( a, a7 );
-    assertEq( a, a10 );
-
     a = vec3(a4.data);
 }
 
@@ -540,27 +511,27 @@ unittest
 {
     auto a = ivec2(1,2);
     auto b = vec2(a);
-    assertEq( a, b );
+    assert( eq( a, b ) );
     auto c = ivec2(b);
-    assertEq( a, c );
+    assert( eq( a, c ) );
 }
 
 unittest
 {
     auto a = vec3(2);
-    assertEq( -a, [-2,-2,-2] );
+    assert( eq( -a, [-2,-2,-2] ) );
 }
 
 ///
 unittest
 {
     auto a = Vector!(3,int)(1,2,3);
-    assertEq( a.x, a.r );
-    assertEq( a.y, a.g );
-    assertEq( a.z, a.b );
-    assertEq( a.x, a.u );
-    assertEq( a.y, a.v );
-    assertEq( a.z, a.t );
+    assert( eq( a.x, a.r ) );
+    assert( eq( a.y, a.g ) );
+    assert( eq( a.z, a.b ) );
+    assert( eq( a.x, a.u ) );
+    assert( eq( a.y, a.v ) );
+    assert( eq( a.z, a.t ) );
 }
 
 ///
@@ -568,13 +539,13 @@ unittest
 {
     auto a = vec3(1,2,3);
 
-    assertEq( a.opDispatch!"x", 1 );
-    assertEq( a.y, 2 );
-    assertEq( a.z, 3 );
+    assert( eq( a.opDispatch!"x", 1 ) );
+    assert( eq( a.y, 2 ) );
+    assert( eq( a.z, 3 ) );
 
     a.opDispatch!"x" = 2;
     a.x = 2;
-    assertEq( a.x, 2 );
+    assert( eq( a.x, 2 ) );
 }
 
 ///
@@ -590,9 +561,9 @@ unittest
     static assert( is(typeof(c) == Vector!(2,float) ) );
     static assert( is(typeof(d) == Vector!(8,float) ) );
 
-    assertEq( b, [1,2] );
-    assertEq( c, [1,1] );
-    assertEq( d, [1,1,1,2,2,3,2,1] );
+    assert( eq( b, [1,2] ) );
+    assert( eq( c, [1,1] ) );
+    assert( eq( d, [1,1,1,2,2,3,2,1] ) );
 }
 
 ///
@@ -602,17 +573,17 @@ unittest
     auto b = dvec4(4,5,6,7);
     auto c = vecD( 9, 10 );
     a.opDispatch!"xz"( b.yw );
-    assertEq( a, [5,2,7] );
+    assert( eq( a, [5,2,7] ) );
     a.zy = c;
-    assertEq( a, [5,10,9] );
+    assert( eq( a, [5,10,9] ) );
     static assert( !__traits(compiles, a.xy=vec3(1,2,3)) );
     static assert( !__traits(compiles, a.xx=vec2(1,2)) );
     auto d = a.zxy = b.wyx;
     static assert( is( d.datatype == double ) );
-    assertEq( d, [ 7,5,4 ] );
-    assertEq( a, [ 5,4,7 ] );
+    assert( eq( d, [ 7,5,4 ] ) );
+    assert( eq( a, [ 5,4,7 ] ) );
     a.yzx = a.zxz;
-    assertEq( a, [ 7,7,5 ] );
+    assert( eq( a, [ 7,7,5 ] ) );
 }
 
 ///
@@ -624,27 +595,35 @@ unittest
     assert( is( typeof(c) == vec3 ) );
     auto d = b + a;
     assert( is( typeof(d) == vecD ) );
-    assert( eq(c,d) );
+    assert( eq( c, d ) );
     auto f = ivec3(1,2,3);
     auto c1 = a + f;
     assert( is( typeof(c1) == vec3 ) );
     auto d1 = ivec3(f) + ivec3(a);
     assert( is( typeof(d1) == ivec3 ) );
-    assertEq(c1,d);
-    assertEq(c,d1);
+    assert( eq( c1, d ) );
+    assert( eq( c, d1 ) );
 
     a *= 2;
     b *= 2;
     auto e = b *= 2;
-    assertEq(a,[2,4,6]);
-    assertEq(b,a*2);
+    assert( eq( a, [2,4,6] ) );
+    assert( eq( b, a*2 ) );
 
     auto x = 2 * a;
-    assertEq(x,[4,8,12]);
+    assert( eq( x, [4,8,12] ) );
 
     assert( !!x );
     x[0] = float.nan;
     assert( !x );
+}
+
+///
+unittest
+{
+    auto a = vec3(2,4,6);
+    a /= 2;
+    assert( eq( a, [1,2,3] ) );
 }
 
 ///
@@ -655,14 +634,14 @@ unittest
     auto b = vec3(a);
     auto c = vecD(b);
 
-    assertEq( a, b );
-    assertEq( a, c );
+    assert( eq( a, b ) );
+    assert( eq( a, c ) );
 }
 ///
 unittest
 {
     auto a = vec3(2,2,1);
-    assertEq( a.rebase(vec3(2,0,0),vec3(0,2,0),vec3(0,0,2)), [1,1,.5] );
+    assert( eq( a.rebase(vec3(2,0,0),vec3(0,2,0),vec3(0,0,2)), [1,1,.5] ) );
 }
 
 ///
@@ -683,7 +662,7 @@ unittest
     assert( is( typeof(n) == real ) );
 
     assert( is( typeof( vec3( 1, 2, 3 ).e ) == vec3 ) );
-    assertEq( a.e.len, 1 );
+    assert( eq( a.e.len, 1 ) );
 }
 
 ///
@@ -706,53 +685,54 @@ unittest
     a *= 2;
     a += a;
 
-    assertEq( a[0][0], 4 );
-    assertEq( a[1][1], 4 );
-    assertEq( a[2][2], 4 );
+    assert( eq( a[0][0], 4 ) );
+    assert( eq( a[1][1], 4 ) );
+    assert( eq( a[2][2], 4 ) );
 
-    assertEq( a[0][1], 0 );
-    assertEq( a[1][2], 0 );
-    assertEq( a[2][1], 0 );
+    assert( eq( a[0][1], 0 ) );
+    assert( eq( a[1][2], 0 ) );
+    assert( eq( a[2][1], 0 ) );
 
     a ^^= 2;
 
-    assertEq( a[0][0], 16 );
-    assertEq( a[1][1], 16 );
-    assertEq( a[2][2], 16 );
+    assert( eq( a[0][0], 16 ) );
+    assert( eq( a[1][1], 16 ) );
+    assert( eq( a[2][2], 16 ) );
 
     auto b = -a;
 
-    assertEq( b[0][0], -16 );
-    assertEq( b[1][1], -16 );
-    assertEq( b[2][2], -16 );
+    assert( eq( b[0][0], -16) );
+    assert( eq( b[1][1], -16) );
+    assert( eq( b[2][2], -16) );
 }
 
 unittest
 {
     auto a = vecD(1,2,3);
     auto b = a;
-    assertEq(a,b);
+    assert( eq( a, b ) );
     b[0] = 111;
-    assertNotEq(a,b);
+    assert( !eq( a, b ) );
 
     vecD c;
     c = b;
-    assertEq(c,b);
+    assert( eq( c, b ) );
     b[0] = 222;
-    assertNotEq(c,b);
+    assert( !eq( c, b ) );
 }
 
 unittest
 {
     auto a = vec3(1,2,3);
     auto b = a;
-    assertEq(a,b);
+    assert( eq( a, b ) );
     b[0] = 111;
-    assertNotEq(a,b);
+    assert( !eq( a, b ) );
 }
 
 /// dot multiplication for compaitable vectors.
-auto dot(size_t N,size_t K,T,E)( in Vector!(N,T) a, in Vector!(K,E) b )
+auto dot(size_t N,size_t K,T,E)( auto ref const(Vector!(N,T)) a,
+                                 auto ref const(Vector!(K,E)) b )
     if( (N==K||K==0||N==0) && hasCompMltAndSum!(T,E) )
 {
     static if( a.isDynamic || b.isDynamic )
@@ -760,9 +740,8 @@ auto dot(size_t N,size_t K,T,E)( in Vector!(N,T) a, in Vector!(K,E) b )
         enforce( a.length == b.length, "wrong length" );
         enforce( a.length > 0, "zero length" );
     }
-    T ret = a[0] * b[0];
-    foreach( i; 1 .. a.length )
-        ret = ret + T( a[i] * b[i] );
+    auto ret = cast(T)(a[0] * b[0]);
+    foreach( i; 1 .. a.length ) ret += cast(T)(a[i] * b[i]);
     return ret;
 }
 
@@ -772,11 +751,11 @@ unittest
     auto a = vec3(1,2,3);
     auto b = vecD(1,2,3);
 
-    assertEq( dot(a,b), 1+4+9 );
+    assert( eq( dot(a,b), 1+4+9 ) );
 }
 
 bool hasCompMltAndSum(T,E)() pure
-{ return is( typeof( T(T.init * E.init) ) ) && is( typeof( T.init + T.init ) == T ); }
+{ return is( typeof( cast(T)(T.init * E.init) ) ) && is( typeof( T.init + T.init ) == T ); }
 
 /// cross multiplication for compaitable vectors.
 auto cross(size_t N,size_t K,T,E)( in Vector!(N,T) a, in Vector!(K,E) b )
@@ -800,14 +779,14 @@ unittest
     auto y = vecD(0,1,0);
     auto z = vecD(0,0,1);
 
-    assertEq( cross(x,y), z );
-    assertEq( cross(y,z), x );
-    assertEq( cross(y,x), -z );
-    assertEq( cross(x,z), -y );
-    assertEq( cross(z,x), y );
+    assert( eq( cross(x,y), z ) );
+    assert( eq( cross(y,z), x ) );
+    assert( eq( cross(y,x), -z ) );
+    assert( eq( cross(x,z), -y ) );
+    assert( eq( cross(z,x), y ) );
 
     auto fy = vecD(0,1,0,0);
-    assertExcept({ auto fz = x * fy; });
+    assert( mustExcept({ auto fz = x * fy; }) );
     auto cfy = vec4(0,1,0,0);
     static assert( !__traits(compiles,x*cfy) );
 }
@@ -878,21 +857,21 @@ unittest
     }
 
     auto b = NF(1,100);
-    assertEq( b.near, b.n );
-    assertEq( b.far, b.f );
+    assert( eq( b.near, b.n ) );
+    assert( eq( b.far, b.f ) );
 
     b.nf = ivec2( 10,20 );
-    assertEq( b.near, 10 );
-    assertEq( b.far, 20 );
+    assert( eq( b.near, 10 ) );
+    assert( eq( b.far, 20 ) );
 }
 
 unittest
 {
     auto a = Vector!(0,float).fill(5,1,2);
-    assertEq( a.length, 5 );
-    assertEq( a.data, [1,2,1,2,1] );
+    assert( eq( a.length, 5 ) );
+    assert( eq( a.data, [1,2,1,2,1] ) );
 
-    auto b = vecD.fillOne( 10, a, 666 );
-    assertEq( b.length, 10 );
-    assertEq( b.data, [1,2,1,2,1,666,666,666,666,666] );
+    auto b = vecD.fill( 10, a, 666 );
+    assert( eq( b.length, 10 ) );
+    assert( eq( b.data, [1,2,1,2,1,666,1,2,1,2] ) );
 }

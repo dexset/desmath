@@ -36,7 +36,7 @@ pure:
     mixin( BasicMathOp!"data" );
 
     ///
-    static selftype fromAngle(size_t K,E)( T alpha, in Vector!(K,E) axis )
+    static selftype fromAngle(size_t K,E)( T alpha, auto ref const(Vector!(K,E)) axis )
         if( (K==0||K==3) && isFloatingPoint!E )
     {
         static if( K==0 ) enforce( axis.length == 3, "wrong length" );
@@ -46,7 +46,7 @@ pure:
     }
 
     ///
-    auto opMul(E)( in Quaterni!E b ) const
+    auto opMul(E)( auto ref const(Quaterni!E) b ) const
     {
         alias this a;
         auto aijk = a.ijk;
@@ -56,7 +56,7 @@ pure:
     }
 
     ///
-    auto rot(size_t K,E)( in Vector!(K,E) b ) const
+    auto rot(size_t K,E)( auto ref const(Vector!(K,E)) b ) const
         if( (K==0||K==3) && is( CommonType!(T,E) : T ) )
     {
         static if( K==0 ) enforce( b.length == 3, "wrong length" );

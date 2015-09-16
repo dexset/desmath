@@ -2,7 +2,7 @@ module des.math.util.flatdata;
 
 import std.traits;
 import std.string;
-import std.typetuple;
+import std.meta;
 
 import des.ts;
 import des.stdx.traits;
@@ -103,7 +103,6 @@ string[] convertValues(T,E...)( string type, string data, string vals, size_t va
     else
         return convertValue!(T,E[0])(type,data,vals,valno) ~ 
                convertValues!(T,E[1..$])(type,data,vals,valno+1); 
-
 }
 
 string[] convertValue(T, E)( string type, string data, string vals, size_t valno ) pure
