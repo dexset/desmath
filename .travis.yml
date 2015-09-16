@@ -1,8 +1,8 @@
 language: d
 
 d:
-    - dmd-2.067.1
-    - gdc-4.9.2
+    - dmd-2.068.1
+    #- gdc-4.9.2
     #- ldc-0.15.2-beta1
 
 script:
