@@ -51,10 +51,7 @@ auto df(T,K,E=T)( T delegate(T) f, K p, E step=E.epsilon*2 )
 unittest
 {
     auto pow2( double x ){ return x^^2; }
-    auto res1 = df( &pow2, 1 );
-    auto res2 = df( &pow2, 3 );
-    auto res3 = df( &pow2, -2 );
-    assertEqApprox( res1, 2.0, 2e-6 );
-    assertEqApprox( res2, 6.0, 2e-6 );
-    assertEqApprox( res3, -4.0, 2e-6 );
+    assertEqApprox( df( &pow2,  1 ), 2.0, 2e-6 );
+    assertEqApprox( df( &pow2,  3 ), 6.0, 2e-6 );
+    assertEqApprox( df( &pow2, -2 ), -4.0, 2e-6 );
 }

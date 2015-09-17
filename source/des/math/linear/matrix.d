@@ -215,7 +215,7 @@ pure:
     }
 
     ///
-    this(size_t oH, size_t oW, X)( in Matrix!(oH,oW,X) mtr )
+    this(size_t oH, size_t oW, X)( auto ref const(Matrix!(oH,oW,X)) mtr )
         if( is( typeof( E(X.init) ) ) )
     {
         static if( isDynamic )
@@ -242,7 +242,7 @@ pure:
             only:
                 if( isDynamic )
          +/
-        ref typeof(this) opAssign(size_t bH, size_t bW, X)( in Matrix!(bH,bW,X) b )
+        ref typeof(this) opAssign(size_t bH, size_t bW, X)( auto ref const(Matrix!(bH,bW,X)) b )
             if( allowSomeOp(H,bH) && allowSomeOp(W,bW) && is(typeof(E(X.init))) )
         {
             static if( isStaticHeight && b.isDynamicHeight ) enforce( height == b.height, "wrong height" );
@@ -370,7 +370,7 @@ pure:
     }
 
     ///
-    auto expandHeight(size_t bH, size_t bW, X)( in Matrix!(bH,bW,X) mtr ) const
+    auto expandHeight(size_t bH, size_t bW, X)( auto ref const(Matrix!(bH,bW,X)) mtr ) const
         if( (bW==W||W==0||bW==0) && is(typeof(E(X.init))) )
     {
         static if( isDynamicWidth || mtr.isDynamicWidth )
@@ -391,7 +391,7 @@ pure:
     { return expandHeight( Matrix!(1,W,E)(vals) ); }
 
     ///
-    auto expandWidth(size_t bH, size_t bW, X)( in Matrix!(bH,bW,X) mtr ) const
+    auto expandWidth(size_t bH, size_t bW, X)( auto ref const(Matrix!(bH,bW,X)) mtr ) const
         if( (bH==H||H==0||bH==0) && is(typeof(E(X.init))) )
     {
         static if( isDynamicHeight || mtr.isDynamicHeight )
@@ -456,7 +456,7 @@ pure:
         return ret;
     }
 
-    private void checkCompatible(size_t bH, size_t bW, X)( in Matrix!(bH,bW,X) mtr ) const
+    private void checkCompatible(size_t bH, size_t bW, X)( auto ref const(Matrix!(bH,bW,X)) mtr ) const
     {
         static if( isDynamicHeight || mtr.isDynamicHeight )
             enforce( height == mtr.height, "wrong height" );
@@ -465,7 +465,7 @@ pure:
     }
 
     ///
-    auto opBinary(string op, size_t bH, size_t bW, X)( in Matrix!(bH,bW,X) mtr ) const
+    auto opBinary(string op, size_t bH, size_t bW, X)( auto ref const(Matrix!(bH,bW,X)) mtr ) const
         if( (op=="+"||op=="-") && allowSomeOp(H,bH) && allowSomeOp(W,bW) )
     {
         checkCompatible( mtr );
@@ -479,7 +479,7 @@ pure:
     }
 
     ///
-    auto opBinary(string op,X)( in X b ) const
+    auto opBinary(string op,X)( auto ref const(X) b ) const
         if( (op!="+" && op!="-") && isValidOp!(op,E,X) )
     {
         auto ret = selftype(this);
@@ -490,7 +490,7 @@ pure:
     }
 
     ///
-    auto opBinary(string op,size_t bH, size_t bW, X)( in Matrix!(bH,bW,X) mtr ) const
+    auto opBinary(string op,size_t bH, size_t bW, X)( auto ref const(Matrix!(bH,bW,X)) mtr ) const
         if( op=="*" && allowSomeOp(W,bH) && isValidOp!("*",E,X) )
     {
         static if( isDynamic || mtr.isDynamic )
@@ -510,7 +510,7 @@ pure:
     }
 
     ///
-    ref typeof(this) opOpAssign(string op, E)( in E b )
+    ref typeof(this) opOpAssign(string op, E)( auto ref const(E) b )
         if( mixin( `is( typeof( selftype.init ` ~ op ~ ` E.init ) == selftype )` ) )
     { mixin( `return this = this ` ~ op ~ ` b;` ); }
 
@@ -556,7 +556,7 @@ pure:
     }
 
     ///
-    ref typeof(this) setRect(size_t bH, size_t bW, X)( size_t pos_row, size_t pos_col, in Matrix!(bH,bW,X) mtr )
+    ref typeof(this) setRect(size_t bH, size_t bW, X)( size_t pos_row, size_t pos_col, auto ref const(Matrix!(bH,bW,X)) mtr )
         if( is(typeof(E(X.init))) )
     {
         enforce( pos_row < height, "bad row index" );
@@ -595,7 +595,7 @@ pure:
     }
 
     ///
-    auto opBinary(string op,size_t K,X)( in Vector!(K,X) v ) const
+    auto opBinary(string op,size_t K,X)( auto ref const(Vector!(K,X)) v ) const
         if( op=="*" && allowSomeOp(W,K) && isValidOp!("*",E,X) && isValidOp!("+",E,E) )
     {
         static if( isDynamic || v.isDynamic )
@@ -618,7 +618,7 @@ pure:
     }
 
     ///
-    auto opBinaryRight(string op,size_t K,X)( in Vector!(K,X) v ) const
+    auto opBinaryRight(string op,size_t K,X)( auto ref const(Vector!(K,X)) v ) const
         if( op=="*" && isVector!(typeof(selftype.init.T * typeof(v).init)) )
     { return this.T * v; }
 

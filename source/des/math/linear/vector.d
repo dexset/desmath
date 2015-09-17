@@ -758,7 +758,7 @@ bool hasCompMltAndSum(T,E)() pure
 { return is( typeof( cast(T)(T.init * E.init) ) ) && is( typeof( T.init + T.init ) == T ); }
 
 /// cross multiplication for compaitable vectors.
-auto cross(size_t N,size_t K,T,E)( in Vector!(N,T) a, in Vector!(K,E) b )
+auto cross(size_t N,size_t K,T,E)( auto ref const(Vector!(N,T)) a, auto ref const(Vector!(K,E)) b )
     if( ((K==3||K==0)&&(N==3||N==0)) && hasCompMltAndSum!(T,E) )
 {
     static if( a.isDynamic ) enforce( a.length == 3, "wrong length a" );
