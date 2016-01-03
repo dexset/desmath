@@ -277,7 +277,7 @@ class MovingAverage(T) if( is(typeof(T[].init.mean)) )
 unittest
 {
     auto ma = new MovingAverage!float( 3 );
-    mustExcept!AssertError({ ma.avg; });
+    assertThrown!AssertError( ma.avg );
     ma.put( 1 );
     assertEq( ma.avg, 1 );
     ma.put( 1 );

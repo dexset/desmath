@@ -786,7 +786,7 @@ unittest
     assert( eq( cross(z,x), y ) );
 
     auto fy = vecD(0,1,0,0);
-    assert( mustExcept({ auto fz = x * fy; }) );
+    assertThrown( x * fy );
     auto cfy = vec4(0,1,0,0);
     static assert( !__traits(compiles,x*cfy) );
 }
