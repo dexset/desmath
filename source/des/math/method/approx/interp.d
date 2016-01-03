@@ -102,7 +102,7 @@ body
     auto omt = 1.0 - t;
     T res = pts[0] * pow(omt,N) + pts[$-1] * pow(t,N);
     foreach( i; 1 .. N )
-        res = res + pts[i] * pow(t,i) * pow(omt,N-i) * combination(N,i);
+        res = res + pts[i] * pow(t,i) * pow(omt,N-i) * combinationCount(N,i);
     return res;
 }
 
