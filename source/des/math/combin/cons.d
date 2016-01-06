@@ -3,56 +3,61 @@ module des.math.combin.cons;
 import std.algorithm;
 import std.typecons;
 import std.range;
+import std.meta;
 
-auto partialPermutationS(R...)( R rngs )
+auto combinations(T...)( T tpls )
 {
-    static if( R.length == 1 )
+    auto result(R...)( R rrr )
+        if( allSatisfy!(isInputRange,R) )
     {
-        alias RF = R[0];
-        static if( !isTuple!RF ) return rngs[0];
-        else return partialPermutationS( rngs[0].expand );
-    }
-    else static if( R.length > 2 )
-        return partialPermutationS( partialPermutationS( rngs[0] ),
-                                    partialPermutationS( rngs[1..$] ) );
-    else static if( R.length == 2 )
-    {
-        alias A = typeof( partialPermutationS( rngs[0] ) );
-        alias B = typeof( partialPermutationS( rngs[1] ) );
-
         static struct Result
         {
-            A a; B b, orig;
+            R r, orig; // храним текущее состояние и исходное
 
-            this( A a, B b ) { this.a = a; this.b = b; orig = b; }
+            this( R r ) { this.r = r; orig = r; }
 
-            bool empty() @property { return a.empty; }
+            bool empty() @property { return r[0].empty; }
 
             void popFront()
             {
-                b.popFront();
-                if( b.empty )
+                foreach_reverse( ref x; r )
                 {
-                    a.popFront();
-                    b = orig;
+                    x.popFront();
+                    if( !x.empty ) break;
+                }
+
+                foreach( i, ref x; r[1..$] )
+                {
+                    if( x.empty )
+                        x = orig[i+1];
                 }
             }
 
-            auto front() @property
-            {
-                return tuple( wrapTuple(a.front).expand,
-                              wrapTuple(b.front).expand );
-            }
+            auto front() @property { return getFronts( r ); }
         }
 
-        return Result( partialPermutationS(rngs[0]), partialPermutationS(rngs[1]) );
+        return Result(rrr);
     }
-    else static assert(0, "zero ranges can not be permutated" );
+
+    auto wrapTuples(X...)( X t ) pure
+    {
+        static if( X.length == 1 )
+        {
+            static if( isTuple!(X[0]) )
+                return wrapTuples( t[0].expand );
+            else
+                return tuple( t[0] );
+        }
+        else static if( X.length > 1 )
+            return tuple( wrapTuples(t[0]).expand, wrapTuples(t[1..$]).expand );
+    }
+
+    return result( wrapTuples(tpls).expand );
 }
 
 unittest
 {
-    auto pp = partialPermutationS( iota(2), iota(3) );
+    auto pp = combinations( iota(2), iota(3) );
     auto exp = [ tuple(0,0), tuple(0,1), tuple(0,2),
                  tuple(1,0), tuple(1,1), tuple(1,2) ];
     assert( equal( pp, exp ) );
@@ -60,9 +65,18 @@ unittest
 
 unittest
 {
-    auto pp1 = partialPermutationS( hCube!2(iota(3)), ["alpha","beta","gamma"], hCube!2(iota(6)) );
-    auto pp2 = partialPermutationS( iota(3), iota(3), ["alpha","beta","gamma"], iota(6), iota(6) );
+    auto pp1 = combinations( hCube!2(iota(3)), ["alpha","beta","gamma"], hCube!2(iota(6)) );
+    auto pp2 = combinations( iota(3), iota(3), ["alpha","beta","gamma"], iota(6), iota(6) );
     assert( equal( pp1, pp2 ) );
+}
+
+auto getFronts(R...)( R r )
+    if( allSatisfy!(isInputRange,R) )
+{
+    static if( R.length == 1 ) return tuple( r[0].front );
+    else static if( R.length > 1 )
+        return tuple( getFronts(r[0]).expand, getFronts(r[1..$]).expand );
+    else static assert(0, "no ranges - no fronts" );
 }
 
 auto hCube(size_t N,R)( R r )
@@ -88,10 +102,11 @@ auto wrapTuple(T)( T val )
 }
 
 auto partialPermutation(R)( R r, size_t k )
+    if( isInputRange!R )
 {
     static struct Result
     {
-        R[] r, orig;
+        R[] r, orig; // храним текущее состояние и исходное
 
         this( R[] r ) { this.r = r; orig = r.dup; }
 
@@ -99,18 +114,16 @@ auto partialPermutation(R)( R r, size_t k )
 
         void popFront()
         {
-            auto N = r.length;
-            ptrdiff_t t = N - 1;
-            r[t].popFront();
-            if( r[t].empty )
+            foreach_reverse( ref x; r )
             {
-                while( r[t].empty && t > 0 )
-                {
-                    t--;
-                    r[t].popFront;
-                }
-                foreach( i; t+1 .. N )
-                    r[i] = orig[i];
+                x.popFront();
+                if( !x.empty ) break;
+            }
+
+            foreach( i, ref x; r[1..$] )
+            {
+                if( x.empty )
+                    x = orig[i+1];
             }
         }
 
